@@ -1,0 +1,141 @@
+{
+  "entities": {
+    "HistoryItem": {
+      "title": "HistoryItem",
+      "description": "A generated test worksheet",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "content": { "type": "string" },
+        "timestamp": { "type": "number" },
+        "promptId": { "type": "string" },
+        "logicSnapshot": { "type": "string" },
+        "module": { "type": "string" },
+        "level": { "type": "string" },
+        "topic": { "type": "string" },
+        "thought": { "type": "string" },
+        "uid": { "type": "string" },
+        "authorEmail": { "type": "string" }
+      },
+      "required": ["id", "title", "content", "timestamp", "uid"]
+    },
+    "CustomExerciseType": {
+      "title": "CustomExerciseType",
+      "description": "User-defined exercise type",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "styleId": { "type": "string" },
+        "uid": { "type": "string" }
+      },
+      "required": ["id", "name", "category", "uid"]
+    },
+    "CustomDesign": {
+      "title": "CustomDesign",
+      "description": "User-defined visual style for an exercise type",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "category": { "type": "string" },
+        "style": { "type": "object" },
+        "timestamp": { "type": "number" },
+        "uid": { "type": "string" }
+      },
+      "required": ["id", "name", "uid"]
+    },
+    "UserSettings": {
+      "title": "UserSettings",
+      "description": "User-specific application settings and branding",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "email": { "type": "string" },
+        "schoolName": { "type": "string" },
+        "schoolAddress": { "type": "string" },
+        "logoData": { "type": "string" },
+        "activeFont": { "type": "string" },
+        "engineConfig": { "type": "object" },
+        "onboardingComplete": { "type": "boolean" },
+        "brandSettings": { "type": "object" },
+        "paperStyles": { "type": "object" },
+        "paperDesign": { "type": "number" },
+        "mcqLayout": { "type": "string" },
+        "mcqSpacing": { "type": "string" },
+        "baseLayout": { "type": "string" },
+        "instructionRulerStyle": { "type": "number" },
+        "createdAt": { "type": "object", "format": "timestamp" },
+        "updatedAt": { "type": "object", "format": "timestamp" }
+      },
+      "required": ["uid"]
+    },
+    "StrictRule": {
+      "title": "StrictRule",
+      "description": "Instructional rule for the engine",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "description": { "type": "string" },
+        "promptInjection": { "type": "string" },
+        "active": { "type": "boolean" },
+        "priority": { "type": "string" },
+        "category": { "type": "string" },
+        "uid": { "type": "string" }
+      },
+      "required": ["id", "label", "promptInjection", "active", "uid"]
+    },
+    "InstructionTemplate": {
+      "title": "InstructionTemplate",
+      "description": "Part/Template definition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "professionalLabel": { "type": "string" },
+        "prompt": { "type": "string" },
+        "category": { "type": "string" },
+        "displayLetter": { "type": "string" },
+        "columnCount": { "type": "number" },
+        "isCustomized": { "type": "boolean" },
+        "typeId": { "type": "string" },
+        "styleName": { "type": "string" },
+        "uid": { "type": "string" }
+      },
+      "required": ["id", "label", "prompt", "uid"]
+    }
+  },
+  "firestore": {
+    "/history/{historyId}": {
+      "schema": "HistoryItem",
+      "description": "Collection of generated tests"
+    },
+    "/customExerciseTypes/{typeId}": {
+      "schema": "CustomExerciseType",
+      "description": "Collection of user-defined exercise types"
+    },
+    "/customDesigns/{designId}": {
+      "schema": "CustomDesign",
+      "description": "Collection of user-defined styles"
+    },
+    "/strictRules/{ruleId}": {
+      "schema": "StrictRule",
+      "description": "User's customized strict rules"
+    },
+    "/masterProtocols/{protocolId}": {
+      "schema": "StrictRule",
+      "description": "User's customized master protocols"
+    },
+    "/instructionTemplates/{templateId}": {
+      "schema": "InstructionTemplate",
+      "description": "User's customized instruction templates"
+    },
+    "/users/{userId}": {
+      "schema": "UserSettings",
+      "description": "User profile and settings"
+    }
+  }
+}

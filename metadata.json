@@ -1,0 +1,8 @@
+{
+  "name": "DPSS Ultimate Test Builder Deploy Vercel",
+  "description": "A high-performance neural-powered reading and vocabulary test generation system for advanced educators.",
+  "requestFramePermissions": [
+    "camera"
+  ],
+  "majorCapabilities": []
+}

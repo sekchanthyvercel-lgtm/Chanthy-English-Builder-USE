@@ -1,0 +1,132 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- GLOBAL HELPERS ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isOwner(uid) {
+      return isSignedIn() && request.auth.uid == uid;
+    }
+
+    // --- ENTITY HELPERS ---
+
+    function isValidHistoryItem(data) {
+      return data.keys().hasAll(['id', 'title', 'content', 'timestamp', 'uid']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.title is string && data.title.size() <= 256 &&
+             data.content is string && data.content.size() <= 1000000 &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidCustomDesign(data) {
+      return data.keys().hasAll(['id', 'name', 'uid']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.name is string && data.name.size() <= 128 &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidStrictRule(data) {
+      return data.keys().hasAll(['id', 'label', 'promptInjection', 'active', 'uid']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.label is string && data.label.size() <= 128 &&
+             data.promptInjection is string && data.promptInjection.size() <= 10000 &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidInstructionTemplate(data) {
+      return data.keys().hasAll(['id', 'label', 'prompt', 'uid']) &&
+             data.id is string && data.id.size() <= 128 &&
+             data.label is string && data.label.size() <= 128 &&
+             data.prompt is string && data.prompt.size() <= 10000 &&
+             data.uid == request.auth.uid;
+    }
+
+    function isValidUserSettings(data) {
+      return data.uid == request.auth.uid &&
+             (!('schoolName' in data) || (data.schoolName is string && data.schoolName.size() <= 256)) &&
+             (!('email' in data) || (data.email is string && data.email.size() <= 256));
+    }
+
+    // --- COLLECTION RULES ---
+
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow create, update: if isOwner(userId) && isEmailVerified() && isValidUserSettings(incoming());
+    }
+
+    match /history/{historyId} {
+      allow get: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+      allow create: if isOwner(incoming().uid) && isEmailVerified() && isValidHistoryItem(incoming());
+      allow update: if isOwner(existing().uid) && isEmailVerified() && isValidHistoryItem(incoming());
+      allow delete: if isOwner(existing().uid) && isEmailVerified();
+    }
+
+    match /customDesigns/{designId} {
+      allow get: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+      allow create: if isOwner(incoming().uid) && isEmailVerified() && isValidCustomDesign(incoming());
+      allow update: if isOwner(existing().uid) && isEmailVerified() && isValidCustomDesign(incoming());
+      allow delete: if isOwner(existing().uid) && isEmailVerified();
+    }
+
+    match /customExerciseTypes/{typeId} {
+      allow get: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+      allow create: if isOwner(incoming().uid) && isEmailVerified();
+      allow update: if isOwner(existing().uid) && isEmailVerified();
+      allow delete: if isOwner(existing().uid) && isEmailVerified();
+    }
+
+    match /strictRules/{ruleId} {
+      allow get: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+      allow create: if isOwner(incoming().uid) && isEmailVerified() && isValidStrictRule(incoming());
+      allow update: if isOwner(existing().uid) && isEmailVerified() && isValidStrictRule(incoming());
+      allow delete: if isOwner(existing().uid) && isEmailVerified();
+    }
+
+    match /masterProtocols/{protocolId} {
+      allow get: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+      allow create: if isOwner(incoming().uid) && isEmailVerified() && isValidStrictRule(incoming());
+      allow update: if isOwner(existing().uid) && isEmailVerified() && isValidStrictRule(incoming());
+      allow delete: if isOwner(existing().uid) && isEmailVerified();
+    }
+
+    match /instructionTemplates/{templateId} {
+      allow get: if isOwner(existing().uid);
+      allow list: if isOwner(resource.data.uid);
+      allow create: if isOwner(incoming().uid) && isEmailVerified() && isValidInstructionTemplate(incoming());
+      allow update: if isOwner(existing().uid) && isEmailVerified() && isValidInstructionTemplate(incoming());
+      allow delete: if isOwner(existing().uid) && isEmailVerified();
+    }
+
+    match /user_history/{email} {
+      allow get, write: if isSignedIn() && isEmailVerified() && request.auth.token.email == email;
+    }
+  }
+}
