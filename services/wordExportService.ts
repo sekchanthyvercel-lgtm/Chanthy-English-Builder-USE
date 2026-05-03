@@ -1562,8 +1562,8 @@ export const exportToWord = (
     const fontSize = Math.round(Math.min(iconWidth, iconHeight) * 0.95); 
     const step = Math.max(22, iconHeight * 1.1); // Slightly more breathing room between symbols
 
-    // Limit vertical icons to stop before footer (~610pt safe height on 792pt page)
-    const maxVerticalIcons = Math.min(40, Math.floor((610 - 50) / step));
+    // Limit vertical icons to stop before footer (~700pt safe height on 792pt page)
+    const maxVerticalIcons = Math.min(40, Math.floor((680 - 50) / step));
 
     const createIconVml = (x: number, y: number) => {
       const icon = starIcons[Math.floor(Math.random() * starIcons.length)];

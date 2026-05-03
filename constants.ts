@@ -76,36 +76,6 @@ export const SUBJECTS = [
     name: 'United Kingdom',
     names: ['Oliver', 'Olivia', 'George', 'Amelia', 'Harry', 'Isla', 'Jack', 'Ava', 'Noah', 'Mia'],
     places: ['Big Ben', 'London Eye', 'Buckingham Palace', 'Stonehenge', 'Edinburgh Castle', 'Roman Baths', 'Tower Bridge', 'Hyde Park', 'The Cotswolds', 'Lake District']
-  },
-  {
-    id: 'brazil',
-    name: 'Brazil',
-    names: ['Gabriel', 'Julia', 'Lucas', 'Alice', 'Matheus', 'Sophia', 'Enzo', 'Laura', 'Guilherme', 'Valentina'],
-    places: ['Christ the Redeemer', 'Sugarloaf Mountain', 'Ipanema Beach', 'Amazon Rainforest', 'Iguazu Falls', 'Salvador', 'Brasilia', 'Pantanal', 'Fernando de Noronha', 'Florianopolis']
-  },
-  {
-    id: 'germany',
-    name: 'Germany',
-    names: ['Maximilian', 'Marie', 'Alexander', 'Sophie', 'Paul', 'Leon', 'Emma', 'Lukas', 'Anna', 'Felix'],
-    places: ['Brandenburg Gate', 'Neuschwanstein Castle', 'Cologne Cathedral', 'Black Forest', 'Bavarian Alps', 'Heidelberg', 'Rothenburg', 'Berlin Wall', 'Zugspitze', 'Rhineland']
-  },
-  {
-    id: 'italy',
-    name: 'Italy',
-    names: ['Leonardo', 'Sofia', 'Francesco', 'Giulia', 'Alessandro', 'Aurora', 'Lorenzo', 'Alice', 'Mattia', 'Ginevra'],
-    places: ['Colosseum', 'Venice Canals', 'Florence Duomo', 'Leaning Tower of Pisa', 'Amalfi Coast', 'Pompeii', 'Lake Como', 'Cinque Terre', 'Sardinia', 'Tuscany']
-  },
-  {
-    id: 'canada',
-    name: 'Canada',
-    names: ['Liam', 'Olivia', 'Noah', 'Emma', 'Jackson', 'Charlotte', 'Lucas', 'Amelia', 'Aiden', 'Mia'],
-    places: ['Niagara Falls', 'Banff National Park', 'CN Tower', 'Whistler', 'Old Quebec', 'Peggy\'s Cove', 'Vancouver Island', 'Bay of Fundy', 'Stanley Park', 'Ottawa Parliament']
-  },
-  {
-    id: 'australia',
-    name: 'Australia',
-    names: ['Oliver', 'Charlotte', 'William', 'Olivia', 'Jack', 'Amelia', 'Noah', 'Isla', 'Thomas', 'Mia'],
-    places: ['Sydney Opera House', 'Great Barrier Reef', 'Uluru', 'Great Ocean Road', 'Bondi Beach', 'Blue Mountains', 'Fraser Island', 'Twelve Apostles', 'Daintree Rainforest', 'Kakadu National Park']
   }
 ];
 
