@@ -31,7 +31,8 @@ import {
   THEMES,
   FONTS,
   SUBJECTS,
-  PAPER_DESIGNS
+  PAPER_DESIGNS,
+  MIXED_SUBJECT_TYPES
 } from './constants';
 
 // --- THE NEW FIREBASE MAGIC ---
@@ -976,7 +977,7 @@ function App() {
     } catch { return 'Vocabulary'; }
   });
   const [activeLanguage, setActiveLanguage] = useState<string>('English');
-  const [activeLevel, setActiveLevel] = useState<AcademicLevel>('Level 7');
+  const [activeLevel, setActiveLevel] = useState<AcademicLevel>('Level 2');
   const [answerStrategy, setAnswerStrategy] = useState<AnswerStrategy>('GENERAL_MIXED');
   const [topic, setTopic] = useState<string>('');
   const [isGenerating, setIsGenerating] = useState(false);
@@ -988,10 +989,10 @@ function App() {
   const [settingsTab, setSettingsTab] = useState<SettingsTab>('COMMAND');
   const [isFrameEnabled, setIsFrameEnabled] = useState(false);
   const [isHandDrawnBorderEnabled, setIsHandDrawnBorderEnabled] = useState(false);
-  const [isTopBottomLineEnabled, setIsTopBottomLineEnabled] = useState(true);
+  const [isTopBottomLineEnabled, setIsTopBottomLineEnabled] = useState(false);
   const [isTopBottomBothEnabled, setIsTopBottomBothEnabled] = useState(false);
   const [topBottomLineColor, setTopBottomLineColor] = useState('#10b981'); // Emerald 500
-  const [isStarLineEnabled, setIsStarLineEnabled] = useState(false);
+  const [isStarLineEnabled, setIsStarLineEnabled] = useState(true);
   const [isStarBothEnabled, setIsStarBothEnabled] = useState(false);
   const [starLineStyle, setStarLineStyle] = useState(0); // 0: Random, 1: Stars, 2: Flowers, 3: Hearts, 4: Mixed
   const [enablePages, setEnablePages] = useState(true);
@@ -1535,9 +1536,25 @@ function App() {
   const [exportSettings, setExportSettings] = useState({
     filename: 'DPSS 1',
     title: 'DPSS 1',
-    theme: 1, // 1 to 6
+    theme: 1, // 1, 4, 5 as requested
     showModal: false,
-    exportTableOrDivider: 'DVD' as 'TB' | 'DVD'
+    exportTableOrDivider: 'DVD' as 'TB' | 'DVD',
+    lineSpacing: '1.15',
+    indentLeft: 0,
+    indentRight: 0,
+    spacingBefore: 0,
+    spacingAfter: 0,
+    exportFontFamily: 'Times New Roman',
+    exportFontSize: 12,
+    exportHeaderStyle: 13,
+    exportInstructionStyle: 4,
+    exportMcqLayout: 'vertical' as 'vertical' | 'compact',
+    exportMatchingStyle: 'columns' as 'columns' | 'boxed',
+    starLineWidth: 30,
+    starLineHeight: 30,
+    starLineXOffset: 2,
+    starLinePosition: 'left' as 'left' | 'right' | 'both' | 'top' | 'bottom',
+    starLineSymbols: ['★', '🌸', '✨', '🌺', '🌼', '⭐', '🌻', '🌹'] as string[]
   });
 
   useEffect(() => { 
@@ -2017,12 +2034,23 @@ ${customHtml}
     const selectedBlankStyle = blankStyles[Math.floor(Math.random() * blankStyles.length)];
 
     let currentSubject = SUBJECTS.find(s => s.id === activeSubject) || SUBJECTS[0];
+    let mixedSubjectInstruction = '';
+    
     if (isRandomSubject) {
       currentSubject = SUBJECTS[Math.floor(Math.random() * SUBJECTS.length)];
+      // Pick TWO random subject types as requested
+      const shuffledTypes = [...MIXED_SUBJECT_TYPES].sort(() => 0.5 - Math.random());
+      const selectedTypes = shuffledTypes.slice(0, 2);
+      
+      mixedSubjectInstruction = `\n[SUBJECT TYPE RANDOMIZATION - MANDATORY]: You MUST heavily favor these two specific subject structures for the sentences in this test:
+1. ${selectedTypes[0].type} (e.g., "${selectedTypes[0].example}")
+2. ${selectedTypes[1].type} (e.g., "${selectedTypes[1].example}")
+Use these alongside the localized names/places provided below. Ensure structural variety by mixing these two types throughout the test.`;
     }
     const subjectInstruction = `\n[LOCALIZATION - CRITICAL]: Use names and places from the following lists to make the test culturally relevant. 
     NAMES: ${currentSubject.names.join(', ')}
     PLACES: ${currentSubject.places.join(', ')}
+    ${mixedSubjectInstruction}
     [TONE_DOWN_LANDMARKS]: Do NOT use landmarks from the PLACES list in every sentence. Focus on standard everyday life activities (e.g., "Park Ji-hoon is buying milk", "Sarah is at the library") with unique names. Use the PLACES list sparingly.
     [SUBJECT_DIVERSITY]: NEVER use the same subject name more than once in the entire test. Every sentence must have a unique subject.`;
 
@@ -2825,32 +2853,44 @@ ${componentLogic}
   };
 
   const confirmExportWord = () => {
-    const { filename, title, theme } = exportSettings;
+    const { 
+      filename, 
+      title, 
+      theme, 
+      lineSpacing, 
+      indentLeft, 
+      indentRight, 
+      spacingBefore, 
+      spacingAfter,
+      exportFontFamily,
+      exportFontSize,
+      exportHeaderStyle,
+      exportInstructionStyle,
+      exportMcqLayout,
+      exportMatchingStyle,
+      starLineWidth,
+      starLineHeight,
+      starLinePosition,
+      starLineXOffset,
+      starLineSymbols
+    } = exportSettings;
     const logoHtml = brandSettings.logoData ? `<table style="width: 100%; border: none; margin-bottom: 2pt;"><tr><td style="border: none; text-align: center;"><img src="${brandSettings.logoData}" width="624" style="width: 6.5in;" /></td></tr></table>` : '';
-    let activeFontFamily = (FONTS.find(f => f.name === brandSettings.activeFont) || FONTS[1]).family;
+    let activeFontFamily = exportFontFamily || (FONTS.find(f => f.name === brandSettings.activeFont) || FONTS[1]).family;
     const activeTheme = THEMES.find(t => t.id === activeThemeId) || THEMES[0];
     const themeColor = activeTheme.color;
     
     // Apply Options 1 to 6 overrides dynamically for export only without modifying the web view state
     let expFrameEnabled = isFrameEnabled;
-    let expMcqStyle = mcqStyle;
+    let expMcqStyle = exportMcqLayout === 'compact' ? 1 : 0;
     let expGlobalLayout = globalLayout;
     
     if (theme === 1) { // Standard
       // Do not reset expGlobalLayout, respect user's choice in Paper Design.
-      // expGlobalLayout = 0; 
-    } else if (theme === 2) { // Frame Bigger Size
-      expFrameEnabled = true;
-    } else if (theme === 3) { // Hand-drawn MCQ
-      expMcqStyle = 12; // Hand-drawn circle mapping
     } else if (theme === 4) { // Handwriting Font
       activeFontFamily = "'Segoe Print', 'Bradley Hand ITC', 'Ink Free', cursive"; 
     } else if (theme === 5) { // Stylist Header
       expGlobalLayout = 0;
       expFrameEnabled = false;
-    } else if (theme === 6) { // Stylist Frame and Stylist header
-      expGlobalLayout = 1; // Example: Orange mix
-      expFrameEnabled = true;
     }
 
     const exportColors = [
@@ -2866,30 +2906,44 @@ ${componentLogic}
       "", // Pass empty string to avoid double header since the LLM already generates the header
       '0.4in 0.6in 0.4in 0.6in',
       activeFontFamily,
-      brandSettings.lineHeight || '1.15',
+      lineSpacing,
       undefined,
       expFrameEnabled,
-      brandSettings.headerStyle !== undefined ? brandSettings.headerStyle : (theme === 5 || theme === 6 ? 5 : paperDesign),
+      theme === 5 ? 5 : exportHeaderStyle,
       paperStyles,
       expMcqStyle,
       expGlobalLayout,
       baseLayout,
-      instructionRulerStyle,
-      instructionHeaderStyle,
+      exportInstructionStyle,
+      exportHeaderStyle,
       instructionStyle,
       isInstructionBackgroundEnabled,
       isColorExportEnabled,
       theme,
       isTopBottomLineEnabled,
       randomizedExportColor,
-      // ── NEW PARAMS ──
-      brandSettings,      
+      {
+        ...brandSettings,
+        fontSize: exportFontSize
+      },      
       paperDesign,        
       topic,
       tableDesignStyle,
       exportSettings.exportTableOrDivider,
       isStarLineEnabled,
-      starLineStyle
+      starLineStyle,
+      {
+        indentLeft,
+        indentRight,
+        spacingBefore,
+        spacingAfter,
+        matchingLayout: exportMatchingStyle,
+        starLineWidth,
+        starLineHeight,
+        starLinePosition,
+        starLineSymbols,
+        starLineXOffset
+      }
     );
     
     setExportSettings(prev => ({ ...prev, showModal: false }));
@@ -3436,16 +3490,19 @@ ${componentLogic}
                                 <i className="fa-solid fa-graduation-cap text-indigo-600 text-[10px]"></i>
                                 <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Academic Level</label>
                              </div>
-                             <div className="grid grid-cols-4 gap-2">
-                               {ACADEMIC_LEVELS.map(lvl => (
-                                 <button
-                                   key={lvl}
-                                   onClick={() => setActiveLevel(lvl as AcademicLevel)}
-                                   className={`py-2 rounded-xl text-[10px] font-bold transition-all border ${lvl === activeLevel ? 'bg-indigo-600 border-indigo-500 text-white shadow-lg shadow-indigo-100' : 'bg-white border-slate-200 text-slate-400 hover:border-indigo-300 hover:text-indigo-600'}`}
-                                 >
-                                   {lvl}
-                                 </button>
-                               ))}
+                             <div className="relative group">
+                               <select 
+                                 value={activeLevel}
+                                 onChange={(e) => setActiveLevel(e.target.value as AcademicLevel)}
+                                 className="w-full bg-white border border-slate-200 rounded-2xl px-5 py-3.5 text-slate-700 font-bold text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50 transition-all appearance-none cursor-pointer shadow-sm pr-10"
+                               >
+                                 {ACADEMIC_LEVELS.map(lvl => (
+                                   <option key={lvl} value={lvl}>{lvl}</option>
+                                 ))}
+                               </select>
+                               <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 text-xs">
+                                 <i className="fa-solid fa-chevron-down"></i>
+                               </div>
                              </div>
                           </div>
                         </div>
@@ -6508,11 +6565,11 @@ ${componentLogic}
       )}
       {/* EXPORT SETTINGS MODAL */}
       {exportSettings.showModal && (
-        <div className="fixed inset-0 z-[100] flex items-start justify-center pt-20 p-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-6">
           <div className="absolute inset-0 bg-slate-900/80 backdrop-blur-md" onClick={() => setExportSettings(prev => ({ ...prev, showModal: false }))}></div>
-          <div className="relative w-full max-w-md bg-white rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300">
-            <div className="p-10">
-              <div className="flex items-center justify-between mb-8">
+          <div className="relative w-full max-w-2xl bg-white rounded-[48px] shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300 flex flex-col max-h-[90vh]">
+            <div className="p-10 shrink-0 border-b border-slate-100">
+              <div className="flex items-center justify-between mb-0">
                 <div className="flex items-center gap-4">
                   <div className="h-12 w-12 bg-orange-100 text-orange-600 rounded-2xl flex items-center justify-center">
                     <i className="fa-solid fa-file-word text-xl"></i>
@@ -6529,27 +6586,313 @@ ${componentLogic}
                   <i className="fa-solid fa-check"></i> Confirm Download
                 </button>
               </div>
-
-              <div className="space-y-6">
+            </div>
+            <div className="flex-1 overflow-y-auto p-10 no-scrollbar space-y-6">
                 <div className="space-y-2">
                   <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">MS Export Style</label>
-                  <div className="grid grid-cols-2 gap-3">
+                  <div className="grid grid-cols-3 gap-3">
                     {[
                       { id: 1, label: 'Option 1: Standard' },
-                      { id: 2, label: 'Option 2: Big Frame' },
-                      { id: 3, label: 'Option 3: Hand-drawn MCQ' },
-                      { id: 4, label: 'Option 4: Handwriting Font' },
+                      { id: 4, label: 'Option 4: Handwriting' },
                       { id: 5, label: 'Option 5: Stylist Header' },
-                      { id: 6, label: 'Option 6: Stylist Header & Frame' },
                     ].map(opt => (
                       <button
                         key={opt.id}
                         onClick={() => setExportSettings(p => ({ ...p, theme: opt.id }))}
-                        className={`py-3 px-4 rounded-2xl text-xs font-bold transition-all border-2 ${exportSettings.theme === opt.id ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-orange-200'}`}
+                        className={`py-3 px-4 rounded-2xl text-[10px] font-bold transition-all border-2 ${exportSettings.theme === opt.id ? 'border-orange-500 bg-orange-50 text-orange-700' : 'border-slate-100 bg-slate-50 text-slate-600 hover:border-orange-200'}`}
                       >
                         {opt.label}
                       </button>
                     ))}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Line Spacing</label>
+                    <select 
+                      value={exportSettings.lineSpacing}
+                      onChange={e => setExportSettings(p => ({ ...p, lineSpacing: e.target.value }))}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-orange-500 font-bold text-slate-700 text-sm"
+                    >
+                      {['1.0', '1.15', '1.5', '2.0', '2.5', '3.0'].map(val => (
+                        <option key={val} value={val}>{val}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Font Size</label>
+                    <input 
+                      type="number"
+                      min="8"
+                      max="24"
+                      value={exportSettings.exportFontSize}
+                      onChange={e => setExportSettings(p => ({ ...p, exportFontSize: parseInt(e.target.value) || 12 }))}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-orange-500 font-bold text-slate-700 text-sm"
+                    />
+                  </div>
+                </div>
+
+                {/* Decorative Line Customization */}
+                <div className="bg-orange-50/30 p-8 rounded-[40px] border border-orange-100 space-y-6">
+                  <div className="flex items-center justify-between">
+                    <div className="text-[10px] font-black text-orange-400 uppercase tracking-widest">Left Strip Decorations (Stars/Flowers)</div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[9px] font-bold text-slate-400 uppercase">Enable</span>
+                      <button 
+                        onClick={() => setIsStarLineEnabled(!isStarLineEnabled)}
+                        className={`w-10 h-5 rounded-full transition-all relative ${isStarLineEnabled ? 'bg-orange-500' : 'bg-slate-200'}`}
+                      >
+                        <div className={`absolute top-1 w-3 h-3 bg-white rounded-full transition-all ${isStarLineEnabled ? 'left-6' : 'left-1'}`}></div>
+                      </button>
+                    </div>
+                  </div>
+
+                  {isStarLineEnabled && (
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-2 gap-3">
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase">Symbol Size</label>
+                          <div className="flex gap-2">
+                            <input 
+                              type="number"
+                              value={exportSettings.starLineWidth}
+                              onChange={e => {
+                                const val = parseInt(e.target.value) || 20;
+                                setExportSettings(p => ({ ...p, starLineWidth: val, starLineHeight: val }));
+                              }}
+                              className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 outline-none focus:border-orange-500 text-xs font-bold"
+                            />
+                            <div className="flex gap-1">
+                              {[20, 30, 40].map(s => (
+                                <button
+                                  key={s}
+                                  onClick={() => setExportSettings(p => ({ ...p, starLineWidth: s, starLineHeight: s }))}
+                                  className={`px-2 rounded-lg text-[10px] font-bold ${exportSettings.starLineWidth === s ? 'bg-orange-600 text-white shadow-sm' : 'bg-slate-50 text-slate-400 border border-slate-100 hover:border-orange-200'}`}
+                                >
+                                  {s === 20 ? 'S' : s === 30 ? 'M' : 'L'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[9px] font-bold text-slate-500 uppercase">Horizontal Push</label>
+                          <input 
+                            type="number"
+                            value={exportSettings.starLineXOffset}
+                            onChange={e => setExportSettings(p => ({ ...p, starLineXOffset: parseInt(e.target.value) || 0 }))}
+                            className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 outline-none focus:border-orange-500 text-xs font-bold"
+                          />
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase">Placement</label>
+                        <div className="grid grid-cols-5 gap-2">
+                          {['left', 'right', 'both', 'top', 'bottom'].map(pos => (
+                            <button
+                              key={pos}
+                              onClick={() => setExportSettings(p => ({ ...p, starLinePosition: pos as any }))}
+                              className={`py-2 rounded-xl text-[9px] font-black uppercase tracking-tighter transition-all ${exportSettings.starLinePosition === pos ? 'bg-orange-500 text-white' : 'bg-white border border-slate-100 text-slate-400 hover:border-orange-200'}`}
+                            >
+                              {pos}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="space-y-2">
+                        <label className="text-[9px] font-bold text-slate-500 uppercase">Symbols Mix (Selected: {exportSettings.starLineSymbols.length})</label>
+                        <div className="grid grid-cols-8 gap-2">
+                          {[
+                            // Nature & Flowers
+                            { char: '★', label: 'Star' }, { char: '⭐', label: 'Bright' }, { char: '✨', label: 'Sparkle' },
+                            { char: '🌸', label: 'Cherry' }, { char: '🌺', label: 'Hibiscus' }, { char: '🌼', label: 'Daisy' },
+                            { char: '🌻', label: 'Sunflower' }, { char: '🌹', label: 'Rose' }, { char: '🌷', label: 'Tulip' },
+                            { char: '🌱', label: 'Seedling' }, { char: '🍀', label: 'Clover' }, { char: '🌿', label: 'Herb' },
+                            { char: '🍁', label: 'Maple' }, { char: '🍂', label: 'Leaves' }, { char: '🌵', label: 'Cactus' },
+                            { char: '🌴', label: 'Palm' }, { char: '🌲', label: 'Pine' }, { char: '🌊', label: 'Wave' },
+                            
+                            // Education & Tools
+                            { char: '✏️', label: 'Pencil' }, { char: '✒️', label: 'Pen' }, { char: '🎨', label: 'Art' },
+                            { char: '📚', label: 'Books' }, { char: '💡', label: 'Idea' }, { char: '🎓', label: 'Grad' },
+                            { char: '📐', label: 'Ruler' }, { char: '✂️', label: 'Scissors' }, { char: '📎', label: 'Clip' },
+                            { char: '🧪', label: 'Lab' }, { char: '🔭', label: 'Scope' }, { char: '🧭', label: 'Compass' },
+                            
+                            // Vehicles & Travel
+                            { char: '🏎️', label: 'Racing Car' }, { char: '🏎', label: 'Supercar' }, { char: '🚗', label: 'Car' },
+                            { char: '🚓', label: 'Police' }, { char: '🚒', label: 'Engine' }, { char: '🚑', label: 'Ambu' },
+                            { char: '🚕', label: 'Taxi' }, { char: '🚙', label: 'SUV' }, { char: '🚌', label: 'Bus' },
+                            { char: '🏍️', label: 'Moto' }, { char: '🚲', label: 'Bike' }, { char: '🚂', label: 'Train' },
+                            { char: '🚁', label: 'Heli' }, { char: '🚀', label: 'Rocket' }, { char: '✈️', label: 'Plane' },
+                            { char: '🚢', label: 'Ship' }, { char: '🛶', label: 'Canoe' }, { char: '🛸', label: 'UFO' },
+                            
+                            // Sports & Music
+                            { char: '⚽', label: 'Ball' }, { char: '🏀', label: 'Basket' }, { char: '🎾', label: 'Tennis' },
+                            { char: '⚾', label: 'Base' }, { char: '🏐', label: 'Volley' }, { char: '🏈', label: 'Rugby' },
+                            { char: '🎹', label: 'Piano' }, { char: '🎸', label: 'Guitar' }, { char: '🎻', label: 'Violin' },
+                            { char: '🎺', label: 'Trumpet' }, { char: '🥁', label: 'Drum' }, { char: '🎷', label: 'Sax' },
+                            { char: '🏆', label: 'Trophy' }, { char: '🏅', label: 'Medal' }, { char: '🎯', label: 'Target' },
+                            
+                            // Misc & Food
+                            { char: '🍎', label: 'Apple' }, { char: '🍕', label: 'Pizza' }, { char: '🍦', label: 'Ice' },
+                            { char: '🍔', label: 'Burger' }, { char: '🍰', label: 'Cake' }, { char: '🍩', label: 'Donut' },
+                            { char: '💎', label: 'Gem' }, { char: '🔥', label: 'Fire' }, { char: '🌈', label: 'Rainbow' },
+                            { char: '⚡', label: 'Bolt' }, { char: '❄️', label: 'Snow' }, { char: '☀️', label: 'Sun' },
+                            { char: '🦋', label: 'Butterfly' }, { char: '🐝', label: 'Bee' }, { char: '🐞', label: 'Ladybug' },
+                            { char: '🐱', label: 'Cat' }, { char: '🐶', label: 'Dog' }, { char: '🦁', label: 'Lion' },
+                            { char: '🐼', label: 'Panda' }, { char: '🦄', label: 'Unicorn' }, { char: '🐬', label: 'Dolphin' },
+                            { char: '🦖', label: 'T-Rex' }, { char: '🐘', label: 'Ele' }, { char: '🐒', label: 'Monkey' },
+                            { char: '🐢', label: 'Turtle' }, { char: '🐙', label: 'Octo' }, { char: '🦑', label: 'Squid' },
+                            { char: '🦞', label: 'Lobster' }, { char: '🦀', label: 'Crab' }, { char: '🐡', label: 'Fish' },
+                            { char: '📱', label: 'Phone' }, { char: '🎮', label: 'Game' }, { char: '📷', label: 'Cam' },
+                            { char: '🎁', label: 'Gift' }, { char: '🎈', label: 'Balloon' }, { char: '👑', label: 'Crown' },
+                            { char: '🍦', label: 'Cone' }, { char: '🍭', label: 'Lolly' }, { char: '🍬', label: 'Candy' },
+                            { char: '🍪', label: 'Cookie' }, { char: '🍩', label: 'Donut' }, { char: '🥤', label: 'Drink' }
+                          ].map(sym => (
+                            <button
+                              key={sym.char}
+                              onClick={() => {
+                                const symbols = [...exportSettings.starLineSymbols];
+                                if (symbols.includes(sym.char)) {
+                                  if (symbols.length > 1) { // Keep at least one
+                                    setExportSettings(p => ({ ...p, starLineSymbols: symbols.filter(s => s !== sym.char) }));
+                                  }
+                                } else {
+                                  setExportSettings(p => ({ ...p, starLineSymbols: [...symbols, sym.char] }));
+                                }
+                              }}
+                              title={sym.label}
+                              className={`h-9 w-9 flex items-center justify-center rounded-xl text-base transition-all ${exportSettings.starLineSymbols.includes(sym.char) ? 'bg-orange-500 text-white shadow-md' : 'bg-white border border-slate-100 text-slate-400 hover:border-orange-200'}`}
+                            >
+                              {sym.char}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Header Style</label>
+                    <select 
+                      value={exportSettings.exportHeaderStyle}
+                      onChange={e => setExportSettings(p => ({ ...p, exportHeaderStyle: parseInt(e.target.value) }))}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-orange-500 font-bold text-slate-700 text-sm"
+                    >
+                      {Array.from({ length: 14 }, (_, i) => i).map(i => (
+                        <option key={i} value={i}>Header Style {i + 1}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Instruction Ruler</label>
+                    <select 
+                      value={exportSettings.exportInstructionStyle}
+                      onChange={e => setExportSettings(p => ({ ...p, exportInstructionStyle: parseInt(e.target.value) }))}
+                      className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-orange-500 font-bold text-slate-700 text-sm"
+                    >
+                      {Array.from({ length: 10 }, (_, i) => i).map(i => (
+                        <option key={i} value={i}>Ruler {i + 1}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">MCQ Layout</label>
+                    <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100 gap-1">
+                      {['vertical', 'compact'].map(mode => (
+                        <button
+                          key={mode}
+                          onClick={() => setExportSettings(p => ({ ...p, exportMcqLayout: mode as 'vertical' | 'compact' }))}
+                          className={`flex-1 py-3 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all ${exportSettings.exportMcqLayout === mode ? 'bg-white shadow-sm text-orange-600' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Matching Style</label>
+                    <div className="flex bg-slate-50 p-1 rounded-2xl border border-slate-100 gap-1">
+                      {['columns', 'boxed'].map(mode => (
+                        <button
+                          key={mode}
+                          onClick={() => setExportSettings(p => ({ ...p, exportMatchingStyle: mode as 'columns' | 'boxed' }))}
+                          className={`flex-1 py-3 text-[10px] font-black uppercase tracking-wider rounded-xl transition-all ${exportSettings.exportMatchingStyle === mode ? 'bg-white shadow-sm text-orange-600' : 'text-slate-400 hover:text-slate-600'}`}
+                        >
+                          {mode}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-2">Font Family</label>
+                  <select 
+                    value={exportSettings.exportFontFamily}
+                    onChange={e => setExportSettings(p => ({ ...p, exportFontFamily: e.target.value }))}
+                    className="w-full bg-slate-50 border border-slate-100 rounded-2xl px-4 py-3 outline-none focus:border-orange-500 font-bold text-slate-700 text-sm"
+                  >
+                    {[
+                      'Times New Roman',
+                      'Arial',
+                      'Calibri',
+                      'EB Garamond',
+                      'Cambria',
+                      'Georgia',
+                      'Segoe UI'
+                    ].map(font => (
+                      <option key={font} value={font}>{font}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="bg-slate-50 p-6 rounded-[32px] border border-slate-100 space-y-4">
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Layout (Indent & Spacing)</div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase">Indent Left (pt)</label>
+                      <input 
+                        type="number"
+                        value={exportSettings.indentLeft}
+                        onChange={e => setExportSettings(p => ({ ...p, indentLeft: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 outline-none focus:border-orange-500 text-xs font-bold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase">Indent Right (pt)</label>
+                      <input 
+                        type="number"
+                        value={exportSettings.indentRight}
+                        onChange={e => setExportSettings(p => ({ ...p, indentRight: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 outline-none focus:border-orange-500 text-xs font-bold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase">Space Before (pt)</label>
+                      <input 
+                        type="number"
+                        value={exportSettings.spacingBefore}
+                        onChange={e => setExportSettings(p => ({ ...p, spacingBefore: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 outline-none focus:border-orange-500 text-xs font-bold"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[9px] font-bold text-slate-500 uppercase">Space After (pt)</label>
+                      <input 
+                        type="number"
+                        value={exportSettings.spacingAfter}
+                        onChange={e => setExportSettings(p => ({ ...p, spacingAfter: parseInt(e.target.value) || 0 }))}
+                        className="w-full bg-white border border-slate-100 rounded-xl px-3 py-2 outline-none focus:border-orange-500 text-xs font-bold"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -6578,15 +6921,13 @@ ${componentLogic}
                   />
                 </div>
               </div>
-
-              <div className="grid grid-cols-2 gap-4 mt-10">
-                <button 
-                  onClick={() => setExportSettings(prev => ({ ...prev, showModal: false }))}
-                  className="py-5 bg-slate-100 text-slate-500 rounded-3xl text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all col-span-2"
-                >
-                  Close
-                </button>
-              </div>
+            <div className="p-8 border-t border-slate-100 bg-white shrink-0">
+              <button 
+                onClick={() => setExportSettings(prev => ({ ...prev, showModal: false }))}
+                className="w-full py-5 bg-slate-100 text-slate-500 rounded-[32px] text-[11px] font-black uppercase tracking-widest hover:bg-slate-200 transition-all"
+              >
+                Close
+              </button>
             </div>
           </div>
         </div>

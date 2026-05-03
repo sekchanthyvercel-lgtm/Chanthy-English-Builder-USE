@@ -40,7 +40,87 @@ export const SUBJECTS = [
     name: 'China',
     names: ['Lie Bui', 'Wei Chen', 'Li Wang', 'Zhang Min', 'Liu Yang', 'Chen Jing', 'Yang Bo', 'Zhao Lei', 'Huang Yan', 'Zhou Tao'],
     places: ['Great Wall', 'Forbidden City', 'Shanghai Bund', 'Terracotta Army', 'West Lake', 'Potala Palace', 'Li River', 'Yellow Mountains', 'Zhangjiajie', 'Jiuziaigou']
+  },
+  {
+    id: 'korea',
+    name: 'South Korea',
+    names: ['Min-jun', 'Seo-yeon', 'Ji-hoon', 'Ji-woo', 'Hyun-woo', 'Min-seo', 'Do-yun', 'Ha-eun', 'Joo-won', 'Chae-won'],
+    places: ['Seoul', 'Busan', 'Jeju Island', 'Gyeongbokgung Palace', 'N Seoul Tower', 'Haeundae Beach', 'Myeongdong', 'Han River', 'Lotte World', 'Nami Island']
+  },
+  {
+    id: 'japan',
+    name: 'Japan',
+    names: ['Hiroto', 'Aoi', 'Ren', 'Himari', 'Yuma', 'Ichika', 'Haruto', 'Akari', 'Souta', 'Sara'],
+    places: ['Tokyo Tower', 'Kyoto Temples', 'Mount Fuji', 'Osaka Castle', 'Shibuya Crossing', 'Nara Park', 'Hiroshima Peace Memorial', 'Hokkaido', 'Okinawa', 'Ginza']
+  },
+  {
+    id: 'thailand',
+    name: 'Thailand',
+    names: ['Somsak', 'Sompong', 'Malee', 'Kanya', 'Arthit', 'Anong', 'Chai', 'Dao', 'Kiet', 'Lek'],
+    places: ['Bangkok', 'Chiang Mai', 'Phuket', 'Grand Palace', 'Wat Arun', 'Sukhothai', 'Railay Beach', 'Ayutthaya', 'Pattaya', 'Koh Samui']
+  },
+  {
+    id: 'vietnam',
+    name: 'Vietnam',
+    names: ['Nguyen', 'Tran', 'Le', 'Pham', 'Hoang', 'Phan', 'Vu', 'Dang', 'Bui', 'Do'],
+    places: ['Hanoi', 'Ho Chi Minh City', 'Ha Long Bay', 'Da Nang', 'Hoi An', 'Hue', 'Sapa', 'Phu Quoc', 'Nha Trang', 'Cu Chi Tunnels']
+  },
+  {
+    id: 'france',
+    name: 'France',
+    names: ['Jean', 'Marie', 'Pierre', 'Celine', 'Lucas', 'Emma', 'Hugo', 'Chloé', 'Louis', 'Manon'],
+    places: ['Eiffel Tower', 'Louvre Museum', 'Notre-Dame', 'Versailles', 'Mont Saint-Michel', 'French Riviera', 'Lyon', 'Bordeaux', 'Marseille', 'Nice']
+  },
+  {
+    id: 'uk',
+    name: 'United Kingdom',
+    names: ['Oliver', 'Olivia', 'George', 'Amelia', 'Harry', 'Isla', 'Jack', 'Ava', 'Noah', 'Mia'],
+    places: ['Big Ben', 'London Eye', 'Buckingham Palace', 'Stonehenge', 'Edinburgh Castle', 'Roman Baths', 'Tower Bridge', 'Hyde Park', 'The Cotswolds', 'Lake District']
+  },
+  {
+    id: 'brazil',
+    name: 'Brazil',
+    names: ['Gabriel', 'Julia', 'Lucas', 'Alice', 'Matheus', 'Sophia', 'Enzo', 'Laura', 'Guilherme', 'Valentina'],
+    places: ['Christ the Redeemer', 'Sugarloaf Mountain', 'Ipanema Beach', 'Amazon Rainforest', 'Iguazu Falls', 'Salvador', 'Brasilia', 'Pantanal', 'Fernando de Noronha', 'Florianopolis']
+  },
+  {
+    id: 'germany',
+    name: 'Germany',
+    names: ['Maximilian', 'Marie', 'Alexander', 'Sophie', 'Paul', 'Leon', 'Emma', 'Lukas', 'Anna', 'Felix'],
+    places: ['Brandenburg Gate', 'Neuschwanstein Castle', 'Cologne Cathedral', 'Black Forest', 'Bavarian Alps', 'Heidelberg', 'Rothenburg', 'Berlin Wall', 'Zugspitze', 'Rhineland']
+  },
+  {
+    id: 'italy',
+    name: 'Italy',
+    names: ['Leonardo', 'Sofia', 'Francesco', 'Giulia', 'Alessandro', 'Aurora', 'Lorenzo', 'Alice', 'Mattia', 'Ginevra'],
+    places: ['Colosseum', 'Venice Canals', 'Florence Duomo', 'Leaning Tower of Pisa', 'Amalfi Coast', 'Pompeii', 'Lake Como', 'Cinque Terre', 'Sardinia', 'Tuscany']
+  },
+  {
+    id: 'canada',
+    name: 'Canada',
+    names: ['Liam', 'Olivia', 'Noah', 'Emma', 'Jackson', 'Charlotte', 'Lucas', 'Amelia', 'Aiden', 'Mia'],
+    places: ['Niagara Falls', 'Banff National Park', 'CN Tower', 'Whistler', 'Old Quebec', 'Peggy\'s Cove', 'Vancouver Island', 'Bay of Fundy', 'Stanley Park', 'Ottawa Parliament']
+  },
+  {
+    id: 'australia',
+    name: 'Australia',
+    names: ['Oliver', 'Charlotte', 'William', 'Olivia', 'Jack', 'Amelia', 'Noah', 'Isla', 'Thomas', 'Mia'],
+    places: ['Sydney Opera House', 'Great Barrier Reef', 'Uluru', 'Great Ocean Road', 'Bondi Beach', 'Blue Mountains', 'Fraser Island', 'Twelve Apostles', 'Daintree Rainforest', 'Kakadu National Park']
   }
+];
+
+export const MIXED_SUBJECT_TYPES = [
+  { type: 'Noun Phrase', example: 'The small café near the river opens early.' },
+  { type: 'Subject Pronoun', example: 'They are studying for the exam.' },
+  { type: 'Gerund', example: 'Running every morning improves health.' },
+  { type: 'Proper Noun (Place)', example: 'Phnom Penh is growing quickly.' },
+  { type: 'Infinitive', example: 'To learn English takes practice.' },
+  { type: 'Compound Subject', example: 'My brother and my cousin play football together.' },
+  { type: 'Simple Noun', example: 'The teacher explained the lesson.' },
+  { type: 'Clause (Subject Clause)', example: 'What he said made everyone laugh.' },
+  { type: 'Dummy Subject', example: 'There is a book on the table.' },
+  { type: 'Interrogative Subject', example: 'Who called you last night?' },
+  { type: 'Proper Noun (Person)', example: 'Sokha is my best friend.' }
 ];
 
 export const FONTS = [

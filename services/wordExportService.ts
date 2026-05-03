@@ -396,6 +396,7 @@ export const exportToWord = (
     scoreLabel?: string;
     teacherLabel?: string;
     logoData?: string;
+    fontSize?: number;
   },
   paperDesignIndex?: number,
   topicText?: string,
@@ -403,8 +404,35 @@ export const exportToWord = (
   exportTableOrDivider: "TB" | "DVD" = "TB",
   isStarLineEnabled: boolean = false,
   starLineStyle: number = 0,
+  layoutOptions?: {
+    indentLeft?: number;
+    indentRight?: number;
+    spacingBefore?: number;
+    spacingAfter?: number;
+    matchingLayout?: 'columns' | 'boxed';
+    starLineSize?: number;
+    starLineSymbols?: string[];
+    starLineXOffset?: number;
+    starLineWidth?: number;
+    starLineHeight?: number;
+    starLinePosition?: 'left' | 'right' | 'both' | 'top' | 'bottom';
+  }
 ) => {
   const mcqLetterCase = "uppercase";
+
+  // Dynamic Line Spacing Logic
+  const spacingMap: Record<string, string> = {
+    "1.0": "12pt",
+    "1.15": "14pt",
+    "1.5": "18pt",
+    "2.0": "24pt",
+    "2.5": "30pt",
+    "3.0": "36pt",
+  };
+  const exactLineHeight =
+    spacingMap[lineHeight] || `${Math.round(parseFloat(lineHeight) * 12)}pt`;
+
+  const matchingLayoutRaw = layoutOptions?.matchingLayout || 'columns';
 
   // PRE-CLEANING: Aggressively remove any empty paragraphs or artificial breaks that cause gaps in Word
   let cleanedHtml = htmlContent
@@ -542,15 +570,17 @@ export const exportToWord = (
     }
   }
 
-  // Dynamic Line Spacing Logic
-  const spacingMap: Record<string, string> = {
-    "1.0": "15pt",
-    "1.15": "18pt",
-    "1.5": "24pt",
-    "2.0": "32pt",
-  };
-  const exactLineHeight =
-    spacingMap[lineHeight] || `${Math.round(parseFloat(lineHeight) * 16)}pt`;
+  // Matching Table Layout Fixes
+  const matchingTables = tempDiv.querySelectorAll('[data-type="matching-table"]');
+  matchingTables.forEach((table) => {
+    const el = table as HTMLElement;
+    if (matchingLayoutRaw === "boxed") {
+      el.style.border = `1pt solid #cbd5e1`;
+      el.style.padding = "10pt";
+      el.style.backgroundColor = "#fdfdfd";
+      el.style.margin = "10pt 0";
+    }
+  });
 
   // 1. Force MCQ text to be plain in Word - ABSOLUTE FIX
   tempDiv
@@ -1343,8 +1373,34 @@ export const exportToWord = (
   }
 
   const sectionsHtml: string[] = [];
+  const seenTexts = new Set<string>();
+
   sections.forEach((el) => {
     const htmlEl = el as HTMLElement;
+    const text = htmlEl.textContent?.trim() || "";
+
+    // DEDUPLICATION: If an instruction or heading has the exact same text as a previous one, skip it
+    // This fixes the "2 instructions" issue where AI generates redundant headers.
+    // We target headings, part-headers, and stylized instruction boxes.
+    const isPotentiallyRedundant = 
+      htmlEl.tagName.startsWith("H") || 
+      htmlEl.classList.contains("header-design") || 
+      htmlEl.classList.contains("part-header") ||
+      htmlEl.classList.contains("instruction-design") ||
+      htmlEl.classList.contains("instruction-box") ||
+      htmlEl.classList.contains("export-instruction") ||
+      htmlEl.tagName === "STRONG" || 
+      htmlEl.tagName === "B";
+
+    const cleanText = text.replace(/\s+/g, ' ').trim();
+    const normalizedText = cleanText.toLowerCase().replace(/[^a-z0-9\s]/g, '');
+
+    if (isPotentiallyRedundant && cleanText && cleanText.length > 5) {
+      if (seenTexts.has(normalizedText)) {
+        return; // Skip this duplicate
+      }
+      seenTexts.add(normalizedText);
+    }
 
     // Apply Organic Shape Drawn styles to Word
     if (
@@ -1361,6 +1417,19 @@ export const exportToWord = (
       htmlEl.style.width = "80%";
       htmlEl.style.textAlign = "center";
       htmlEl.style.display = "block";
+    }
+
+    // If it's a table, let's also check its internal first row for duplication with the previous instruction
+    if (htmlEl.tagName === "TABLE") {
+      const firstRow = htmlEl.querySelector("tr");
+      if (firstRow) {
+        const rowText = firstRow.textContent?.trim() || "";
+        if (rowText && seenTexts.has(rowText)) {
+          // Hide the first row if it duplicates a standalone instruction header
+          (firstRow as HTMLElement).style.display = "none";
+          (firstRow as HTMLElement).style.visibility = "hidden";
+        }
+      }
     }
 
     // Only add non-empty elements
@@ -1478,21 +1547,71 @@ export const exportToWord = (
 
   // 5.1. Star Line Logic (The "Cute Strip")
   if (isStarLineEnabled) {
-    const starIcons = ["★", "🌸", "✨", "🌺", "🌼", "⭐", "🌻", "🌹"];
+    const starIcons = layoutOptions?.starLineSymbols && layoutOptions.starLineSymbols.length > 0
+      ? layoutOptions.starLineSymbols
+      : ["★", "🌸", "✨", "🌺", "🌼", "⭐", "🌻", "🌹"];
+    
     let starVml = "";
-    const xPos = isTopBottomLineEnabled ? 35 : 5; // Position it next to the top-bottom bar if active
+    const baseOffset = isTopBottomLineEnabled ? 35 : 10;
+    const xOffset = layoutOptions?.starLineXOffset || 0;
+    const iconWidth = layoutOptions?.starLineWidth || 20;
+    const iconHeight = layoutOptions?.starLineHeight || 20;
+    const position = layoutOptions?.starLinePosition || 'left';
+    
+    // Scale font size to fit container, with a small safety margin
+    const fontSize = Math.round(Math.min(iconWidth, iconHeight) * 0.95); 
+    const step = Math.max(22, iconHeight * 1.1); // Slightly more breathing room between symbols
 
-    for (let i = 0; i < 35; i++) {
+    // Limit vertical icons to stop before footer (~610pt safe height on 792pt page)
+    const maxVerticalIcons = Math.min(40, Math.floor((610 - 50) / step));
+
+    const createIconVml = (x: number, y: number) => {
       const icon = starIcons[Math.floor(Math.random() * starIcons.length)];
-      const yPos = 50 + i * 22;
-      const rotation = Math.random() * 40 - 20;
-      starVml += `
-            <v:rect style="position:absolute; left:${xPos}pt; top:${yPos}pt; width:20pt; height:20pt; z-index:10; mso-position-horizontal-relative:page; mso-position-vertical-relative:page;" filled="f" stroked="f">
-              <v:textbox style="mso-fit-shape-to-text:t;" inset="0,0,0,0">
-                <div style="font-size:9pt; color:${activeRulerColor}; transform:rotate(${rotation}deg); opacity:0.6;">${icon}</div>
+      const rotation = Math.round(Math.random() * 40 - 20);
+      
+      // Use a larger v:rect than the icon size to prevent clipping, while centering the icon
+      const rectWidth = iconWidth * 2; 
+      const rectHeight = iconHeight * 2;
+      const rectX = x - (rectWidth - iconWidth) / 2;
+      const rectY = y - (rectHeight - iconHeight) / 2;
+
+      return `
+            <v:rect style="position:absolute; left:${rectX}pt; top:${rectY}pt; width:${rectWidth}pt; height:${rectHeight}pt; z-index:10; rotation:${rotation}; mso-position-horizontal-relative:page; mso-position-vertical-relative:page;" filled="f" stroked="f">
+              <v:textbox inset="0,0,0,0" style="mso-fit-shape-to-text:f; v-text-anchor:middle;">
+                <p class="MsoNormal" align="center" style="text-align:center; line-height:normal; margin:0;">
+                  <span style="font-size:${fontSize}pt; line-height:${fontSize}pt; font-family:'Segoe UI Emoji', 'Segoe UI Symbol', 'Apple Color Emoji', sans-serif;">${icon}</span>
+                </p>
               </v:textbox>
             </v:rect>
           `;
+    };
+
+    if (position === 'left' || position === 'both') {
+      const xPos = baseOffset + xOffset;
+      for (let i = 0; i < maxVerticalIcons; i++) {
+        starVml += createIconVml(xPos, 50 + i * step);
+      }
+    }
+    
+    if (position === 'right' || position === 'both') {
+      const xPos = 550 + xOffset; 
+      for (let i = 0; i < maxVerticalIcons; i++) {
+        starVml += createIconVml(xPos, 50 + i * step);
+      }
+    }
+
+    if (position === 'top') {
+      const yPos = 20;
+      for (let i = 0; i < 22; i++) {
+        starVml += createIconVml(20 + i * step, yPos);
+      }
+    }
+
+    if (position === 'bottom') {
+      const yPos = 750;
+      for (let i = 0; i < 22; i++) {
+        starVml += createIconVml(20 + i * step, yPos);
+      }
     }
 
     // If we don't have headerWatermarks yet, create the structure
@@ -1511,22 +1630,31 @@ export const exportToWord = (
     }
   }
 
+  // Dynamic Line Spacing Logic
+  const exportFontSize = brandSettings?.fontSize || 12;
+
+  const indentStyle = layoutOptions ? `
+    margin-left: ${layoutOptions.indentLeft || 0}pt;
+    margin-right: ${layoutOptions.indentRight || 0}pt;
+    mso-margin-top-alt: ${layoutOptions.spacingBefore || 0}pt;
+    mso-margin-bottom-alt: ${layoutOptions.spacingAfter || 0}pt;
+    margin-top: ${layoutOptions.spacingBefore || 0}pt;
+    margin-bottom: ${layoutOptions.spacingAfter || 0}pt;
+  ` : '';
+
   const content = `
     <html xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:w="urn:schemas-microsoft-com:office:word" xmlns="http://www.w3.org/TR/REC-html40">
     <head><meta charset='utf-8'>
       <style>
         @page Section1 { size: 8.5in 11.0in; margin: 0.5in; mso-header-margin: 0.5in; mso-footer-margin: 0.5in; ${headerWatermarks ? "mso-header: h1;" : ""} ${pageBorderStyle} }
         div.Section1 { page: Section1; }
-        body { font-family: "${cleanFontName}", serif; font-size: 12pt; background-color: ${bodyBgColor}; }
+        body { font-family: "${cleanFontName}", serif; font-size: ${exportFontSize}pt; background-color: ${bodyBgColor}; }
         p, div, span, h1, h2, h3, h4, h5, h6, td, ul, ol, li {
-          mso-margin-top-alt: 0pt;
-          mso-margin-bottom-alt: 0pt;
-          margin-top: 0pt;
-          margin-bottom: 0pt;
-          mso-margin-right-alt: 0pt;
-          margin-right: 0pt;
+          ${indentStyle}
+          line-height: ${exactLineHeight};
+          mso-line-height-alt: ${exactLineHeight};
+          mso-line-height-rule: exactly;
         }
-        p, li { line-height: 115%; mso-line-height-alt: 13.8pt; }
         table { border-collapse: collapse; width: 100%; }
         td { padding: 0; vertical-align: top; }
         .options-table td { mso-line-height-rule: at-least; line-height: 24pt; height: 26pt; }
