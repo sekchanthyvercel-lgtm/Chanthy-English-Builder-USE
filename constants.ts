@@ -195,16 +195,13 @@ A. have to add          B. had to add          C. must add          D. has to ad
    - At advanced levels, separate the subject from the main verb using relative clauses or prepositional phrases.
    - Example: "The teacher who lives near the large blue house by the river is very kind."
 29.1 [THE SHUFFLE & DECOUPLE PROTOCOL]:
-   - [ORDER INDEPENDENCE]: The sequence of words in Part A (Study List) must have ZERO correlation with the sequence in Parts B, C, D, E, and G.
-   - [THE SCRAMBLE]: You must internally shuffle the vocabulary list before generating EACH individual part.
-   - [RANDOMIZATION EXAMPLE]: If Part A is (1. Mitigate, 2. Call off, 3. Pragmatic), then Part B must be a scramble like (1. Mitigate, 2. Pragmatic, 3. Call off) and Part C must be another scramble like (1. Pragmatic, 2. Call off, 3. Mitigate).
-   - [INDEX DECOUPLING]: If Word #1 in Part A is "Mitigate," then Question #1 in Part C must be a different word (e.g., Word #7 or #12).
-   - [BOX SHUFFLE]: In Part G (Word Box), the words inside the box must be listed in a random or alphabetical order, but the sentences below them must be shuffled so they do not match the box order.
-   - [PATTERN BREAKING]: You are FORBIDDEN from starting any exercise with the first word from the study list.
-   - [MATCHING ANTI-CHEAT]: In Part D (Matching), the terms (1-15) MUST be randomized. Do NOT list Word #1 as #1 in Matching.
-   - [MCQ DECOUPLING]: Question #1 in MCQ sections (Part E) MUST be a random word from the 15, never Word #1.
-   - [DISTRACTOR INCLUSION]: In 'Word Box' exercises, provide 12 words for 10 sentences. The 2 extra words must be contextually plausible but incorrect.
-   - [SYNONYM VARIANCE]: In Matching, use synonyms or paraphrases for the definitions so students cannot match the exact phrasing from Part A.
+   - In Part A, list them with definitions.
+   - In ALL other parts (B, C, D, E, G, H):
+     → RANDOMIZE the order of the vocabulary.
+     → Do NOT match the same numbering from Part A.
+     → Mix the answers so that #1 is different every time.
+   - Ensure each vocabulary word is still used correctly.
+   - Shuffle answer positions (A, B, C, D choices as well).
 
 --- 📐 DESIGN TEST STYLE (ABSOLUTE PRIORITY) ---
 30. [DESIGN OVERRIDE]: The specific "Design Test Style" and "Format Design" instructions provided at the end of the prompt are the ABSOLUTE source of truth for formatting. They OVERRIDE any general prompt logic or default formatting rules.
@@ -292,7 +289,7 @@ export const DEFAULT_MASTER_PROTOCOLS: StrictRule[] = [
   { id: 'mp-design-priority', label: '30. [DESIGN OVERRIDE]', description: 'Visual style takes priority.', promptInjection: '[DESIGN TEST STYLE (ABSOLUTE PRIORITY)]: The Format Design instructions OVERRIDE any default prompt logic.', active: true, priority: 'High', category: 'General' },
   { id: 'mp-global-neutrality', label: 'GLOBAL NEUTRALITY', description: 'Zero bias towards example rules.', promptInjection: '[GLOBAL NEUTRALITY]: You are FORBIDDEN from favoring specific grammar/vocab/reading examples mentioned in standard protocols (e.g., Avoid over-using "Must/Have to" or "Modern Architecture"). Ensure maximum structural variety and objective diagnostic neutrality across all parts of the test.', active: true, priority: 'High', category: 'General' },
   { id: 'mp-extreme-neutrality', label: 'EXTREME NEUTRALITY', description: 'Zero theme repetition.', promptInjection: '[EXTREME NEUTRALITY]: Global Grammar/Vocabulary/Reading Neutrality: Removed biases towards specific grammar/Vocabulary/Reading rules mentioned in examples, ensuring variety across all parts of the test.', active: true, priority: 'High', category: 'General' },
-  { id: 'mp-vocab-shuffle', label: 'VOCAB SHUFFLE & DECOUPLE', description: 'Zero-correlation word ordering.', promptInjection: '[THE SHUFFLE & DECOUPLE PROTOCOL]: Sequence of words in Part A MUST NOT match questions in C, D, E, G. Internally scramble word list before EACH part. Question #1 cannot be Word #1. No cheating patterns.', active: true, priority: 'High', category: 'Vocabulary' },
+  { id: 'mp-vocab-shuffle', label: 'VOCAB SHUFFLE & DECOUPLE', description: 'Zero-correlation word ordering.', promptInjection: '[THE SHUFFLE & DECOUPLE PROTOCOL]: - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly. - Shuffle answer positions (A, B, C, D choices as well).', active: true, priority: 'High', category: 'Vocabulary' },
   { id: 'mp-advanced-architecture', label: 'ADVANCED ARCHITECTURE', description: 'Mini-stories and difficulty scaling.', promptInjection: '[ADVANCED LEVEL ARCHITECTURE (LEVEL 4+)]: 1. [SCENARIO DENSITY]: For Level 4+, every item MUST be a 2-3 sentence mini-story. 2. [SYNTACTIC BURSTINESS]: Alternate sentence lengths and use complex structures in 50% items. 3. [DIFFICULTY GRADIENT]: 1-3 Confidence, 4-7 Standard, 8-10 Complex Logic. 4. [LINGUISTIC NOISE]: At L6+, insert noise between subject and blank. 5. [SUBORDINATION]: Use "Despite", "Nevertheless", etc. in 3/10 items.', active: true, priority: 'Medium', category: 'General' },
   { id: 'mp-structural-inversion', label: 'STRUCTURAL INVERSION', description: 'Blank rotation and clause flipping.', promptInjection: '[STRUCTURAL INVERSION & POSITIONAL LOGIC]: 1. [BLANK SCRAMBLE]: Per 10 items, rotate blank (3 Start, 4 Middle, 3 End). 2. [CLAUSE FLIPPING]: Alternate Subordinate vs Main clause first. 3. [ADVERBIAL FRONTING]: Start 20% of L4+ items with long phrases. 4. [CLEFT & EMPHASIS]: Use "It is... that" or "What... is". 5. [INTERRUPTING PHRASES]: Place a phrase between subject and blank in 3/10 items.', active: true, priority: 'Medium', category: 'General' }
 ];
@@ -315,7 +312,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'STUDY TABLE', 
     professionalLabel: '<b>STUDY THE FOLLOWING TERMS AND DEFINITIONS.</b>', 
-    prompt: '2-column HTML table. GROUNDING: Use source. FILL all columns. NO underscores. NO answer key for this part.', 
+    prompt: '2-column HTML table. GROUNDING: Use source. FILL all columns. NO underscores. NO answer key for this part. - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 2 
   },
   { 
@@ -323,7 +320,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'MATCHING', 
     professionalLabel: '<b>MATCH THE TERMS WITH THE DEFINITIONS.</b>', 
-    prompt: '2-column table. Column 1: Blank + Number + Term. Column 2: Letter + Definition. Scramble order. Mix subjects. ALL content must be strictly Vocabulary rules (NO grammar).', 
+    prompt: '2-column table. Column 1: Blank + Number + Term. Column 2: Letter + Definition. Scramble order. Mix subjects. ALL content must be strictly Vocabulary rules (NO grammar). - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 1 
   },
   { 
@@ -331,7 +328,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'MCQ', 
     professionalLabel: '<b>CHOOSE THE BEST WORD FOR EACH CONTEXT.</b>', 
-    prompt: 'Vocab MCQ. ALL choices must be Vocabulary words, NOT grammar. All choices must be the same part of speech. [GLOBAL MIX] for names. Horizontal compression. Indent 6 spaces.', 
+    prompt: 'Vocab MCQ. ALL choices must be Vocabulary words, NOT grammar. All choices must be the same part of speech. [GLOBAL MIX] for names. Horizontal compression. Indent 6 spaces. - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly. - Shuffle answer positions (A, B, C, D choices as well).', 
     columnCount: 1 
   },
   { 
@@ -339,7 +336,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'SPEAKING', 
     professionalLabel: '<b>VOCABULARY SPEAKING & DISCUSSION.</b>', 
-    prompt: '10 conversation questions using target vocab. Mix school scenarios like noisy motorbikes or rainy days (Law 5).', 
+    prompt: '10 conversation questions using target vocab. Mix school scenarios like noisy motorbikes or rainy days (Law 5). - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 1 
   },
   { 
@@ -347,7 +344,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'STUDY EXAMPLE', 
     professionalLabel: '<b>STUDY THESE EXAMPLE SENTENCES.</b>', 
-    prompt: 'Context sentences for study. NO underscores. Focus strictly on vocabulary words, not peoples names. Add 1-3 phrasal verbs and 1 idiom per 10 items. Burstiness in sentence length.', 
+    prompt: 'Context sentences for study. NO underscores. Focus strictly on vocabulary words, not peoples names. Add 1-3 phrasal verbs and 1 idiom per 10 items. Burstiness in sentence length. - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 1 
   },
   { 
@@ -355,7 +352,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'SUPPLY KEY TERMS', 
     professionalLabel: '<b>READ THE DEFINITION AND SUPPLY THE CORRECT TERM.</b>', 
-    prompt: '2-column table. Column 1: Definition. Column 2: Blank line for term. No MCQ.', 
+    prompt: '2-column table. Column 1: Definition. Column 2: Blank line for term. No MCQ. - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 1 
   },
   { 
@@ -363,7 +360,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'SYNONYM WRITING', 
     professionalLabel: '<b>REWRITE THE SENTENCES USING A SYNONYM FOR THE HIGHLIGHTED WORD.</b>', 
-    prompt: 'Sentence rewrite using synonyms. Long underscores for answers. [GLOBAL MIX] subjects.', 
+    prompt: 'Sentence rewrite using synonyms. Long underscores for answers. [GLOBAL MIX] subjects. - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 1 
   },
   { 
@@ -371,7 +368,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'T/F', 
     professionalLabel: '<b>DECIDE IF THE STATEMENTS ARE TRUE OR FALSE.</b>', 
-    prompt: 'Vocab focused T/F. Style: "1. (_____)" (5 underscores). No MCQ.', 
+    prompt: 'Vocab focused T/F. Style: "1. (_____)" (5 underscores). No MCQ. - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 1 
   },
   { 
@@ -379,7 +376,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'VOCABULARY', 
     label: 'VOCABULARY BOX', 
     professionalLabel: '<b>FILL IN THE BLANKS WITH WORDS FROM THE BOX.</b>', 
-    prompt: 'Word bank fill-in. Include 3 extra distractors. Apply [GLOBAL MIX] to stems. Compact layout.', 
+    prompt: 'Word bank fill-in. Include 3 extra distractors. Apply [GLOBAL MIX] to stems. Compact layout. - In Part A, list them with definitions. - In ALL other parts (B, C, D, E, G, H): → RANDOMIZE the order of the vocabulary. → Do NOT match the same numbering from Part A. → Mix the answers so that #1 is different every time. - Ensure each vocabulary word is still used correctly.', 
     columnCount: 1 
   },
 

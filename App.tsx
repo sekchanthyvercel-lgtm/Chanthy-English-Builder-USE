@@ -1454,7 +1454,8 @@ function App() {
         if (fresh) {
           return {
             ...t,
-            category: fresh.category // Always fix category to prevent leaking
+            category: fresh.category, // Always fix category to prevent leaking
+            prompt: fresh.category === 'VOCABULARY' ? fresh.prompt : t.prompt
           };
         }
         return t;
@@ -1590,9 +1591,19 @@ function App() {
       let changed = false;
       const next = prev.map(t => {
         const defaultTemp = INITIAL_TEMPLATES.find(dt => dt.id === t.id);
-        if (defaultTemp && t.category !== defaultTemp.category && !t.id.toString().startsWith('custom-')) {
-          changed = true;
-          return { ...t, category: defaultTemp.category };
+        if (defaultTemp && !t.id.toString().startsWith('custom-')) {
+          const isVocab = defaultTemp.category === 'VOCABULARY';
+          const needsCategoryFix = t.category !== defaultTemp.category;
+          const needsPromptFix = isVocab && t.prompt !== defaultTemp.prompt;
+          
+          if (needsCategoryFix || needsPromptFix) {
+            changed = true;
+            return { 
+              ...t, 
+              category: defaultTemp.category,
+              prompt: isVocab ? defaultTemp.prompt : t.prompt
+            };
+          }
         }
         return t;
       });
