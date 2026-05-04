@@ -138,7 +138,7 @@ Objective: Execute three-layered cognitive construction for maximum diagnostic i
 4. [ANSWER BUCKET]: Use [BUCKET RANDOMIZATION] (3A, 2B, 2C, 3D per 10). Max streak 2. Answer key must match exercise type.
 
 --- LAYER 2: SKILL MODULES (PRIORITY 2 - COGNITIVE DEPTH) ---
-5. [READING MODULE]: [EXPERT EXAMINER MODE]. Paraphrase everything; no word-matching. Mix gist/detail. Include reference traps and negative framing. For Level 10+, passages MUST be long and intellectually rigorous (400-600+ words).
+5. [READING MODULE]: [EXPERT EXAMINER MODE]. Paraphrase everything; no word-matching. Mix gist, detail, and [INFERENTIAL CLOZE] (incomplete sentence completions). For "One/Two Words", use IELTS style (questions + statement gaps). For Level 10+, passages MUST be 500-800+ words.
 6. [VOCABULARY MODULE]: [POS CONSISTENCY]. All distractors must be same part of speech. [SHUFFLE & DECOUPLE]: Randomize order, don't match Part A definitions.
 7. [GRAMMAR MODULE]: [RULE EXHAUSTION]. Test every sub-rule of {{TOPIC}}. Use [POSITIONAL LOGIC] (Word order, comparative traps, adverb placement).
 
@@ -274,9 +274,9 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
   { 
     id: 'r_short_answer_elite', 
     category: 'READING', 
-    label: 'SHORT ANSWER', 
-    professionalLabel: '<b>ANSWER THE QUESTIONS BRIEFLY BASED ON THE TEXT.</b>', 
-    prompt: 'Reading passage. Short answer questions. Test paraphrase recognition.', 
+    label: 'ONE/TWO WORDS', 
+    professionalLabel: '<b>WRITE NO MORE THAN TWO WORDS AND/OR A NUMBER FOR EACH ANSWER.</b>', 
+    prompt: 'IELTS style short answer and statement completion. Items can be questions (e.g., "Where...?") or incomplete sentences (e.g., "She is interested in ______"). MANDATORY: Use heavy paraphrasing and synonyms. The words in the answer must exist in the text, but the question stem must use synonyms of the context. Provide exact word count limits.', 
     columnCount: 1 
   },
   { 
@@ -284,7 +284,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'READING', 
     label: 'INFERENTIAL', 
     professionalLabel: '<b>INFERENTIAL COMPREHENSION ANALYSIS.</b>', 
-    prompt: 'Items testing deep inference. What is implied but not stated?', 
+    prompt: 'Items testing deep inference using incomplete sentence stems. The passage provides context, and the item ends abruptly (e.g., "She likes her work, and she..."). Options must be logical conclusions. Use stems like: "We can infer that...", "It suggests that...", "Probably...". The answer MUST NOT be directly stated in the text.', 
     columnCount: 1 
   },
   { 
@@ -417,21 +417,45 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     prompt: 'Transcribe the sentences or text verbatim.',
     columnCount: 1
   },
+  { 
+    id: 'r_summary_elite', 
+    category: 'READING', 
+    label: 'SUMMARY BOX', 
+    professionalLabel: '<b>COMPLETE THE SUMMARY BELOW USING THE WORDS FROM THE BOX.</b>', 
+    prompt: 'IELTS style summary completion. Rewrite a section of the main passage in simpler/different words. Provide an HTML box containing vocabulary options. MANDATORY: The box MUST contain more words (distractors) than there are blanks in the summary.', 
+    columnCount: 1 
+  },
+  { 
+    id: 'r_header_matching_elite', 
+    category: 'READING', 
+    label: 'HEADER MATCHING', 
+    professionalLabel: '<b>MATCH THE HEADINGS TO THE CORRECT PARAGRAPHS.</b>', 
+    prompt: 'IELTS style heading matching. Provide a list of headings (i, ii, iii...) and a series of paragraphs (Section A, B, C...). Students must match them.', 
+    columnCount: 1 
+  },
   {
-    id: 'r_summary_elite',
+    id: 'r_mcq_3_elite',
     category: 'READING',
-    label: 'SUMMARY',
-    professionalLabel: '<b>COMPLETE THE SUMMARY OF THE TEXT.</b>',
-    prompt: 'Complete a summary with the correct vocabulary or grammar form.',
+    label: 'MCQ (3 OPTIONS)',
+    professionalLabel: '<b>CHOOSE THE CORRECT LETTER (A, B, or C).</b>',
+    prompt: 'Reading MCQ with exactly 3 answer choices. Focus on precise meaning.',
     columnCount: 1
   },
   {
-    id: 'r_reading_comp_elite',
+    id: 'r_mcq_4_elite',
     category: 'READING',
-    label: 'READING COMPREHENSION',
-    professionalLabel: '<b>READ THE PASSAGE AND ANSWER THE QUESTIONS.</b>',
-    prompt: 'General reading comprehension questions.',
+    label: 'MCQ (4 OPTIONS)',
+    professionalLabel: '<b>CHOOSE THE CORRECT LETTER (A, B, C, or D).</b>',
+    prompt: 'Reading MCQ with exactly 4 answer choices. Focus on complex detail.',
     columnCount: 1
+  },
+  { 
+    id: 'r_reading_comp_elite', 
+    category: 'READING', 
+    label: 'READING COMPREHENSION', 
+    professionalLabel: '<b>READ THE PASSAGE AND ANSWER THE QUESTIONS.</b>', 
+    prompt: 'General reading comprehension questions.', 
+    columnCount: 1 
   },
   {
     id: 'r_tf_ng_elite',

@@ -143,17 +143,17 @@ const DEFAULT_SESSION: UserSession = {
   loginTime: Date.now()
 };
 
-const MASTER_PROTOCOLS_KEY = 'dp_master_v54';
-const STRICT_RULES_KEY = 'dp_rules_v54';
-const TEMPLATES_KEY = 'dp_templates_v53';
-const HISTORY_KEY = 'dp_history_v53';
-const BRAND_SETTINGS_KEY = 'dp_brand_v53';
-const USER_SESSION_KEY = 'dp_session_v59';
-const ENGINE_CONFIG_KEY = 'dp_engine_config_v60';
-const ONBOARDING_KEY = 'dp_onboarding_v60';
-const SELECTED_TEMPLATES_KEY = 'dp_selected_v60';
-const SELECTED_THEME_KEY = 'dp_theme_v59';
-const ACTIVE_MODULE_KEY = 'dp_module_v59';
+const MASTER_PROTOCOLS_KEY = 'dp_master_v61';
+const STRICT_RULES_KEY = 'dp_rules_v61';
+const TEMPLATES_KEY = 'dp_templates_v61';
+const HISTORY_KEY = 'dp_history_v61';
+const BRAND_SETTINGS_KEY = 'dp_brand_v61';
+const USER_SESSION_KEY = 'dp_session_v61';
+const ENGINE_CONFIG_KEY = 'dp_engine_config_v61';
+const ONBOARDING_KEY = 'dp_onboarding_v61';
+const SELECTED_TEMPLATES_KEY = 'dp_selected_v61';
+const SELECTED_THEME_KEY = 'dp_theme_v61';
+const ACTIVE_MODULE_KEY = 'dp_module_v61';
 
 const StylePreview: React.FC<{ styleName?: string; typeId?: string; label?: string }> = ({ styleName, typeId, label }) => {
   const name = styleName || label || '';
@@ -1455,8 +1455,11 @@ function App() {
         if (fresh) {
           return {
             ...t,
-            category: fresh.category, // Always fix category to prevent leaking
-            prompt: fresh.category === 'VOCABULARY' ? fresh.prompt : t.prompt
+            category: fresh.category,
+            label: fresh.label,
+            professionalLabel: fresh.professionalLabel,
+            prompt: fresh.prompt,
+            columnCount: fresh.columnCount
           };
         }
         return t;
@@ -1475,7 +1478,7 @@ function App() {
       // VOCABULARY
       'v_study_table_elite', 'v_study_example_elite', 'v_supply_terms_elite', 'v_matching_elite', 'v_mcq_elite', 'v_tf_vocab_elite', 'v_vocab_box_elite',
       // READING
-      'r_tf_stmt_elite', 'r_mcq_elite', 'r_short_answer_elite', 'r_inferential_elite', 'r_critical_thinking_elite', 'r_summary_elite',
+      'r_tf_stmt_elite', 'r_mcq_elite', 'r_short_answer_elite', 'r_inferential_elite', 'r_critical_thinking_elite', 'r_summary_elite', 'r_tf_ng_elite', 'r_header_matching_elite', 'r_mcq_3_elite', 'r_mcq_4_elite', 'r_reading_comp_elite',
       // GRAMMAR
       'g_correct_incorrect_elite', 'g_circle_elite', 'g_complete_sentences_elite', 'g_mcq_elite', 'g_double_mcq_elite', 'g_write_correct_form_elite'
     ];
@@ -1508,7 +1511,7 @@ function App() {
       // GRAMMAR
       'g_correct_incorrect_elite': 20, 'g_circle_elite': 10, 'g_complete_sentences_elite': 10, 'g_mcq_elite': 10, 'g_double_mcq_elite': 10, 'g_write_correct_form_elite': 10,
       // READING
-      'r_tf_stmt_elite': 10, 'r_mcq_elite': 10, 'r_short_answer_elite': 10, 'r_inferential_elite': 10, 'r_critical_thinking_elite': 10, 'r_summary_elite': 10,
+      'r_tf_stmt_elite': 9, 'r_tf_ng_elite': 9, 'r_short_answer_elite': 6, 'r_inferential_elite': 12, 'r_summary_elite': 6, 'r_header_matching_elite': 6, 'r_mcq_3_elite': 6, 'r_mcq_4_elite': 6, 'r_mcq_elite': 6, 'r_critical_thinking_elite': 5
     };
     try {
       const saved = localStorage.getItem('dp_item_overrides_v59');
@@ -2361,10 +2364,37 @@ ${activeModule === 'Reading' ? `4. READING PASSAGE LOGIC & PLACEMENT:
 - "Vocabulary Bank": Use the "shape-drawn" classes for any word banks to give them a hand-drawn organic appearance.
 `;
     
-    const componentLogic = selectedTemps.map((t, idx) => {
+    const componentLogic_Calculated = selectedTemps.map((t, idx) => {
       const overrideCol = columnOverrides[t.id] !== undefined ? columnOverrides[t.id] : (t.columnCount !== undefined ? t.columnCount : defaultColumnCount);
-      const overrideItems = itemCountOverrides[t.id] || 10;
       
+      let overrideItems = itemCountOverrides[t.id] || 10;
+      
+      // Reading Specific Randomized Defaults
+      if (activeModule === 'Reading' && !itemCountOverrides[t.id]) {
+        if (t.id.includes('tf') || t.label.includes('TRUE/FALSE') || t.id.includes('tf_ng')) {
+          overrideItems = Math.floor(Math.random() * (10 - 8 + 1)) + 8; // 8-10 items
+        } else if (t.id.includes('short_answer') || t.label.toUpperCase().includes('ONE/TWO WORDS')) {
+          overrideItems = Math.floor(Math.random() * (7 - 5 + 1)) + 5; // 5-7 items
+        } else if (t.id.includes('inferential')) {
+          overrideItems = Math.floor(Math.random() * (15 - 10 + 1)) + 10; // 10-15 items
+        } else if (t.id.includes('summary')) {
+          overrideItems = Math.floor(Math.random() * (7 - 5 + 1)) + 5; // 5-7 items
+        } else if (t.id.includes('header_matching')) {
+          overrideItems = Math.floor(Math.random() * (8 - 5 + 1)) + 5; // 5-8 items
+        } else if (t.id.includes('mcq_3')) {
+          overrideItems = Math.floor(Math.random() * (8 - 4 + 1)) + 4; // 4-8 items
+        } else if (t.id.includes('mcq_4') || t.id === 'r_mcq_elite' || t.id === 'r_expert_mcq_elite') {
+          overrideItems = Math.floor(Math.random() * (8 - 4 + 1)) + 4; // 4-8 items
+        } else {
+          // General humanization for any other reading component
+          overrideItems = Math.floor(Math.random() * (12 - 6 + 1)) + 6; 
+        }
+      }
+
+      return { t, idx, overrideCol, overrideItems };
+    });
+
+    const componentLogic = componentLogic_Calculated.map(({ t, idx, overrideCol, overrideItems }) => {
       const rawHeader = `PART ${String.fromCharCode(65 + idx)}: ${t.professionalLabel || t.label}`;
       const formattedHeader = instructionCase === 'uppercase' ? rawHeader.toUpperCase() : instructionCase === 'lowercase' ? toTitleCase(rawHeader) : rawHeader;
 
@@ -2591,15 +2621,18 @@ ${answerKeyProtocol}
          - LEVEL ADAPTATION: The length and level of thinking must strictly match the selected Academic Level (${activeLevel}).`
       : '';
 
-    const readingPassageLength = (activeLevel === 'Kid' || activeLevel === 'Beginner') ? '50-80 words' : '300-500 words';
+    const readingPassageLength = 
+      (activeLevel === 'Kid' || activeLevel === 'Beginner' || activeLevel === 'Level 1' || activeLevel === 'Level 2') ? '80-120 words' : 
+      (activeLevel === 'Level 11' || activeLevel === 'Level 12' || activeLevel === 'Level 13' || activeLevel === 'Level 14' || activeLevel === 'IELTS' || activeLevel === 'TOEFL') ? '600-850+ words' :
+      '350-550 words';
     const readingPassageInstruction = isSingleReadingText 
       ? `1. GENERATE ONE SINGLE PASSAGE (~${readingPassageLength}) about "${topic || fallbackTopic}" at the top of the test.` 
       : `1. GENERATE A UNIQUE, SEPARATE PASSAGE (~${readingPassageLength}) FOR EVERY SINGLE PART of the test. Each part MUST have its own distinct text.`;
 
-    const componentList = selectedTemps.map((t, idx) => {
-      const label = t.professionalLabel || t.label;
+    const componentList = componentLogic_Calculated.map((item: any) => {
+      const label = item.t.professionalLabel || item.t.label;
       const formattedLabel = instructionCase === 'uppercase' ? label.toUpperCase() : instructionCase === 'lowercase' ? toTitleCase(label) : label;
-      return `- PART ${String.fromCharCode(65 + idx)}: ${formattedLabel} (Item Count: ${itemCountOverrides[t.id] || 10})`;
+      return `- PART ${String.fromCharCode(65 + item.idx)}: ${formattedLabel} (Item Count: ${item.overrideItems})`;
     }).join('\n');
 
     const isHighLevel = ['Level 5', 'Level 6', 'Level 7', 'Level 8', 'Level 9', 'Level 10', 'Level 11', 'Upper Intermediate', 'Advanced', 'IELTS', 'TOEFL'].includes(activeLevel);
@@ -3634,14 +3667,18 @@ ${componentLogic}
                       {(() => {
                         const categoryTemplates = instructionTemplates.filter(t => {
                           if (t.category?.toUpperCase() !== activeModule.toUpperCase()) return false;
-                          if (activeModule.toUpperCase() === 'GRAMMAR' || activeModule.toUpperCase() === 'READING') {
-                            const forbidden = [
-                              'STUDY TABLE', 'MATCHING', 'MCQ', 'SPEAKING', 
-                              'STUDY EXAMPLE', 'SUPPLY KEY TERMS', 'SYNONYM WRITING', 
-                              'T/F', 'VOCABULARY BOX'
-                            ];
-                            if (forbidden.includes(t.label?.toUpperCase() || '')) return false;
+                          
+                          // Simplified filtering: Only hide clearly irrelevant non-elite components if needed
+                          if (activeModule.toUpperCase() === 'GRAMMAR') {
+                            const forbiddenGrammar = ['STUDY TABLE', 'SPEAKING', 'STUDY EXAMPLE', 'SUPPLY KEY TERMS', 'VOCABULARY BOX'];
+                            if (forbiddenGrammar.includes(t.label?.toUpperCase() || '')) return false;
                           }
+                          
+                          if (activeModule.toUpperCase() === 'READING') {
+                            const forbiddenReading = ['STUDY TABLE', 'SPEAKING', 'STUDY EXAMPLE', 'VOCABULARY BOX'];
+                            if (forbiddenReading.includes(t.label?.toUpperCase() || '')) return false;
+                          }
+                          
                           return true;
                         });
 
@@ -3705,7 +3742,7 @@ ${componentLogic}
                                       <span className="text-[10px] font-bold text-slate-900">{(itemCountOverrides[t.id] || 10)}</span>
                                     </div>
                                     <div className="flex items-center gap-1 bg-slate-100/50 p-1 rounded-xl border border-slate-200/40">
-                                      {[5,10,15,20,25].map(n => {
+                                      {[1,5,8,10,12,15,20].map(n => {
                                         const isActive = (itemCountOverrides[t.id] || 10) === n;
                                         return (
                                           <button 
