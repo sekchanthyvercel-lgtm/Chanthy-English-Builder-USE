@@ -8,14 +8,14 @@ export enum NeuralEngine {
   DEEPSEEK_V3 = 'deepseek-chat'
 }
 
-export type AcademicLevel = 'Level 1' | 'Level 2' | 'Level 3' | 'Level 4' | 'Level 5' | 'Level 6' | 'Level 7' | 'Level 8' | 'Level 9' | 'Level 10' | 'Level 11' | 'Kid' | 'Beginner' | 'Pre-Elementary' | 'Elementary' | 'Higher Elementary' | 'Pre-Intermediate' | 'Intermediate' | 'Upper Intermediate' | 'Advanced' | 'TOEFL' | 'IELTS';
+export type AcademicLevel = 'Level 1' | 'Level 2' | 'Level 3' | 'Level 4' | 'Level 5' | 'Level 6' | 'Level 7' | 'Level 8' | 'Level 9' | 'Level 10' | 'Level 11' | 'Level 12' | 'Level 13' | 'Level 14' | 'Kid' | 'Beginner' | 'Pre-Elementary' | 'Elementary' | 'Higher Elementary' | 'Pre-Intermediate' | 'Intermediate' | 'Upper Intermediate' | 'Advanced' | 'TOEFL' | 'IELTS';
 export type AnswerStrategy = 'TOPIC_FOCUSED' | 'GENERAL_MIXED' | 'GLOBAL_RANDOM';
 export type WorksheetLength = 'Short' | 'Medium' | 'Long';
 export type SettingsTab = 'COMMAND' | 'ACCOUNT' | 'ENGINE' | 'BACKBONE LOGIC' | 'DESIGN' | 'FORMAT_DESIGN' | 'BACKGROUND' | 'LOGO';
 export type PaperType = 'Plain' | 'Ruled' | 'Handwriting' | 'Dotted' | 'Grid';
 export type LayoutStyle = 'Standard' | 'Full Columns' | 'Variable Layout';
 export type Priority = 'High' | 'Medium' | 'Average' | 'Low';
-export type RuleCategory = 'General' | 'Grammar' | 'Vocabulary' | 'Reading' | 'Generals' | 'Custom' | 'Mixed';
+export type RuleCategory = 'General' | 'Grammar' | 'Vocabulary' | 'Reading' | 'Generals' | 'Custom' | 'Mixed' | 'Core' | 'Modules' | 'Style';
 
 export interface ExternalKeys {
   [NeuralEngine.GPT_4O]?: string;

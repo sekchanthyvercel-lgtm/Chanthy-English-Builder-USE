@@ -2068,6 +2068,15 @@ Use these alongside the localized names/places provided below. Ensure structural
       ? "CRITICAL: Randomly choose between ALL CAPS or Title Case for EVERY SINGLE instruction header. HOWEVER, READING PASSAGES, exercises, and questions MUST ALWAYS use normal sentence case."
       : "";
 
+    const lengthInstruction = `\n[TEST LENGTH SCALING - ABSOLUTE MANDATORY]: You MUST adjust the total length and item count of the test to match the "{{LEVEL}}" academic difficulty.
+    - Levels 1-3: Short test (approx. 10-15 items total across all parts). Simple sentences.
+    - Levels 4-6: Standard school test (approx. 20-30 items total). Compound sentences.
+    - Levels 7-9: Comprehensive assessment (approx. 35-45 items total). Complex sentences.
+    - Levels 10-12 (TOEFL/IELTS): Full formal exam simulation (approx. 50-60+ items). Professional academic depth.
+    - Levels 13-14: Professional mastery (extensive content, maximum structural complexity, 70+ items).
+    [LEVEL 11 SPECIFIC]: For Level 11, the test MUST be long. Reading passages MUST be at least 500 words. Grammar sections MUST have at least 15 items. Vocabulary sections MUST have at least 15 items.
+    NOTE: Failure to provide sufficient length for High Levels (10-14) is a critical failure. Scale the content to be professional and complete for the selected level. Correct answer must be provably correct based only on the text. Length of test is based on level selected: Make it like real exam in professional settings.`;
+
     const protocolsPrompt = filteredProtocols.map(p => `[PROTOCOL - ${p.priority}]: ${p.promptInjection.replace(/{{BLANK}}/g, selectedBlankStyle)}`).join('\n');
     const rulesPrompt = filteredRules.map(r => `[STRICT RULE - ${r.priority}]: ${r.promptInjection.replace(/{{BLANK}}/g, selectedBlankStyle)}`).join('\n');
     
@@ -2651,6 +2660,7 @@ ${componentList}
     const listeningTapescriptPrompt = '';
 
     const finalLogic = `
+${lengthInstruction.replace(/{{LEVEL}}/g, activeLevel)}
 ${extraVocabPrompt}
 ${moduleSafetyGuard}
 ${listeningLogicFirewall}
