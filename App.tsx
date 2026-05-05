@@ -1478,7 +1478,7 @@ function App() {
       // VOCABULARY
       'v_study_table_elite', 'v_study_example_elite', 'v_supply_terms_elite', 'v_matching_elite', 'v_mcq_elite', 'v_tf_vocab_elite', 'v_vocab_box_elite',
       // READING
-      'r_tf_stmt_elite', 'r_mcq_elite', 'r_short_answer_elite', 'r_inferential_elite', 'r_critical_thinking_elite', 'r_summary_elite', 'r_tf_ng_elite', 'r_header_matching_elite', 'r_mcq_3_elite', 'r_mcq_4_elite', 'r_reading_comp_elite',
+      'r_tf_stmt_elite', 'r_mcq_elite', 'r_short_answer_elite', 'r_inferential_elite', 'r_critical_thinking_elite', 'r_summary_elite', 'r_tf_ng_elite', 'r_header_matching_elite', 'r_mcq_3_elite', 'r_mcq_4_elite', 'r_reading_comp_elite', 'r_ending_inference_elite', 'r_topic_identification_elite',
       // GRAMMAR
       'g_correct_incorrect_elite', 'g_circle_elite', 'g_complete_sentences_elite', 'g_mcq_elite', 'g_double_mcq_elite', 'g_write_correct_form_elite'
     ];
@@ -1511,7 +1511,7 @@ function App() {
       // GRAMMAR
       'g_correct_incorrect_elite': 20, 'g_circle_elite': 10, 'g_complete_sentences_elite': 10, 'g_mcq_elite': 10, 'g_double_mcq_elite': 10, 'g_write_correct_form_elite': 10,
       // READING
-      'r_tf_stmt_elite': 9, 'r_tf_ng_elite': 9, 'r_short_answer_elite': 6, 'r_inferential_elite': 12, 'r_summary_elite': 6, 'r_header_matching_elite': 6, 'r_mcq_3_elite': 6, 'r_mcq_4_elite': 6, 'r_mcq_elite': 6, 'r_critical_thinking_elite': 5
+      'r_tf_stmt_elite': 9, 'r_tf_ng_elite': 9, 'r_short_answer_elite': 6, 'r_inferential_elite': 12, 'r_summary_elite': 6, 'r_header_matching_elite': 6, 'r_mcq_3_elite': 6, 'r_mcq_4_elite': 6, 'r_mcq_elite': 6, 'r_critical_thinking_elite': 5, 'r_ending_inference_elite': 12, 'r_topic_identification_elite': 8
     };
     try {
       const saved = localStorage.getItem('dp_item_overrides_v59');
@@ -2071,14 +2071,16 @@ Use these alongside the localized names/places provided below. Ensure structural
       ? "CRITICAL: Randomly choose between ALL CAPS or Title Case for EVERY SINGLE instruction header. HOWEVER, READING PASSAGES, exercises, and questions MUST ALWAYS use normal sentence case."
       : "";
 
-    const lengthInstruction = `\n[TEST LENGTH SCALING - ABSOLUTE MANDATORY]: You MUST adjust the total length and item count of the test to match the "{{LEVEL}}" academic difficulty.
-    - Levels 1-3: Short test (approx. 10-15 items total across all parts). Simple sentences.
-    - Levels 4-6: Standard school test (approx. 20-30 items total). Compound sentences.
-    - Levels 7-9: Comprehensive assessment (approx. 35-45 items total). Complex sentences.
-    - Levels 10-12 (TOEFL/IELTS): Full formal exam simulation (approx. 50-60+ items). Professional academic depth.
-    - Levels 13-14: Professional mastery (extensive content, maximum structural complexity, 70+ items).
-    [LEVEL 11 SPECIFIC]: For Level 11, the test MUST be long. Reading passages MUST be at least 500 words. Grammar sections MUST have at least 15 items. Vocabulary sections MUST have at least 15 items.
-    NOTE: Failure to provide sufficient length for High Levels (10-14) is a critical failure. Scale the content to be professional and complete for the selected level. Correct answer must be provably correct based only on the text. Length of test is based on level selected: Make it like real exam in professional settings.`;
+    const lengthInstruction = `\n[CONTENT VOLUME SCALING - CRITICAL]: You MUST adjust the total content density to match the "${activeLevel}" difficulty.
+    - Levels 1-2: 100-word passages.
+    - Levels 5-6: 450-500 word passages.
+    - Levels 11-14: 750-1000+ word passages (Professional/Academic standard).
+    [READING ITEM COUNT]: For Reading, the total items MUST always be exactly 40, divided proportionally across selected parts.
+    [GENERAL ITEM COUNT]: For other modules:
+    - Levels 1-3: ~15 items total.
+    - Levels 4-9: ~30-45 items total.
+    - Levels 10-14: ~60-80+ items total.
+    NOTE: If Level is 11-14, producing short text is a critical failure. Scale the depth and volume to be exhaustive for a professional-grade exam.`;
 
     const protocolsPrompt = filteredProtocols.map(p => `[PROTOCOL - ${p.priority}]: ${p.promptInjection.replace(/{{BLANK}}/g, selectedBlankStyle)}`).join('\n');
     const rulesPrompt = filteredRules.map(r => `[STRICT RULE - ${r.priority}]: ${r.promptInjection.replace(/{{BLANK}}/g, selectedBlankStyle)}`).join('\n');
@@ -2369,30 +2371,76 @@ ${activeModule === 'Reading' ? `4. READING PASSAGE LOGIC & PLACEMENT:
       
       let overrideItems = itemCountOverrides[t.id] || 10;
       
-      // Reading Specific Randomized Defaults
-      if (activeModule === 'Reading' && !itemCountOverrides[t.id]) {
-        if (t.id.includes('tf') || t.label.includes('TRUE/FALSE') || t.id.includes('tf_ng')) {
-          overrideItems = Math.floor(Math.random() * (10 - 8 + 1)) + 8; // 8-10 items
-        } else if (t.id.includes('short_answer') || t.label.toUpperCase().includes('ONE/TWO WORDS')) {
-          overrideItems = Math.floor(Math.random() * (7 - 5 + 1)) + 5; // 5-7 items
-        } else if (t.id.includes('inferential')) {
-          overrideItems = Math.floor(Math.random() * (15 - 10 + 1)) + 10; // 10-15 items
-        } else if (t.id.includes('summary')) {
-          overrideItems = Math.floor(Math.random() * (7 - 5 + 1)) + 5; // 5-7 items
-        } else if (t.id.includes('header_matching')) {
-          overrideItems = Math.floor(Math.random() * (8 - 5 + 1)) + 5; // 5-8 items
-        } else if (t.id.includes('mcq_3')) {
-          overrideItems = Math.floor(Math.random() * (8 - 4 + 1)) + 4; // 4-8 items
-        } else if (t.id.includes('mcq_4') || t.id === 'r_mcq_elite' || t.id === 'r_expert_mcq_elite') {
-          overrideItems = Math.floor(Math.random() * (8 - 4 + 1)) + 4; // 4-8 items
-        } else {
-          // General humanization for any other reading component
-          overrideItems = Math.floor(Math.random() * (12 - 6 + 1)) + 6; 
-        }
-      }
+      // Reading Specific Dynamic 40-Item Balancing
+      if (activeModule === 'Reading') {
+        const totalWeight = selectedTemps.reduce((acc, curr) => {
+          let weight = itemCountOverrides[curr.id];
+          if (!weight) {
+            if (curr.id.includes('tf') || curr.label.includes('TRUE/FALSE') || curr.id.includes('tf_ng')) weight = 9;
+            else if (curr.id.includes('short_answer') || curr.label.toUpperCase().includes('ONE/TWO WORDS')) weight = 6;
+            else if (curr.id.includes('inferential')) weight = 12;
+            else if (curr.id.includes('summary')) weight = 6;
+            else if (curr.id.includes('header_matching')) weight = 6;
+            else if (curr.id.includes('mcq')) weight = 6;
+            else if (curr.id.includes('ending')) weight = 12;
+            else if (curr.id.includes('topic')) weight = 8;
+            else weight = 10;
+          }
+          return acc + weight;
+        }, 0);
 
+        // Current item's preferred weight
+        let myWeight = itemCountOverrides[t.id];
+        if (!myWeight) {
+          if (t.id.includes('tf') || t.label.includes('TRUE/FALSE') || t.id.includes('tf_ng')) myWeight = 9;
+          else if (t.id.includes('short_answer') || t.label.toUpperCase().includes('ONE/TWO WORDS')) myWeight = 6;
+          else if (t.id.includes('inferential')) myWeight = 12;
+          else if (t.id.includes('summary')) myWeight = 6;
+          else if (t.id.includes('header_matching')) myWeight = 6;
+          else if (t.id.includes('mcq')) myWeight = 6;
+          else if (t.id.includes('ending')) myWeight = 12;
+          else if (t.id.includes('topic')) myWeight = 8;
+          else myWeight = 10;
+        }
+
+        // Proportional distribution to reach 40 total
+        const baseShare = (myWeight / totalWeight) * 40;
+        overrideItems = Math.round(baseShare);
+
+        // Correct for rounding if it's the last item
+        if (idx === selectedTemps.length - 1) {
+          const othersSum = selectedTemps.slice(0, -1).reduce((acc, curr, i) => {
+             // We need to know what the previous items were calculated as
+             // For simplicity, let's just do a second pass or a more robust calculation
+             return acc; 
+          }, 0);
+          // Simplified: The engine will handle the distribution better in a single pass
+        }
+      } else if (!itemCountOverrides[t.id]) {
+        // ... (rest of randomized defaults if not Reading)
+      }
+      
+      // Secondary Pass for Reading to ensure sum is exactly 40
       return { t, idx, overrideCol, overrideItems };
     });
+
+    // Final correction pass for Reading module only
+    if (activeModule === 'Reading' && componentLogic_Calculated.length > 0) {
+      const currentSum = componentLogic_Calculated.reduce((acc, item) => acc + item.overrideItems, 0);
+      const diff = 40 - currentSum;
+      if (diff !== 0) {
+        // Apply difference to the largest part to avoid making a small part 0
+        let targetIdx = 0;
+        let maxVal = -1;
+        componentLogic_Calculated.forEach((item, i) => {
+          if (item.overrideItems > maxVal) {
+            maxVal = item.overrideItems;
+            targetIdx = i;
+          }
+        });
+        componentLogic_Calculated[targetIdx].overrideItems += diff;
+      }
+    }
 
     const componentLogic = componentLogic_Calculated.map(({ t, idx, overrideCol, overrideItems }) => {
       const rawHeader = `PART ${String.fromCharCode(65 + idx)}: ${t.professionalLabel || t.label}`;
@@ -2623,11 +2671,16 @@ ${answerKeyProtocol}
 
     const readingPassageLength = 
       (activeLevel === 'Kid' || activeLevel === 'Beginner' || activeLevel === 'Level 1' || activeLevel === 'Level 2') ? '80-120 words' : 
-      (activeLevel === 'Level 11' || activeLevel === 'Level 12' || activeLevel === 'Level 13' || activeLevel === 'Level 14' || activeLevel === 'IELTS' || activeLevel === 'TOEFL') ? '600-850+ words' :
-      '350-550 words';
+      (activeLevel === 'Level 3' || activeLevel === 'Level 4') ? '180-280 words' :
+      (activeLevel === 'Level 5' || activeLevel === 'Level 6') ? '400-500 words' :
+      (activeLevel === 'Level 7' || activeLevel === 'Level 8' || activeLevel === 'Level 9') ? '600-750 words' :
+      '850-1000+ words';
+
     const readingPassageInstruction = isSingleReadingText 
-      ? `1. GENERATE ONE SINGLE PASSAGE (~${readingPassageLength}) about "${topic || fallbackTopic}" at the top of the test.` 
-      : `1. GENERATE A UNIQUE, SEPARATE PASSAGE (~${readingPassageLength}) FOR EVERY SINGLE PART of the test. Each part MUST have its own distinct text.`;
+      ? `1. GENERATE ONE SINGLE MASSIVE PASSAGE (~${readingPassageLength}) about "${topic || fallbackTopic}" at the top of the test. IMPORTANT: This text must be intellectually rigorous and sufficiently long to support 40 items.` 
+      : `1. GENERATE UNIQUE PASSAGES FOR EVERY PART.
+         - For "ONE/TWO WORDS", "T/F", "SUMMARY": Use very long passages (~${readingPassageLength}).
+         - For "TOPIC ID" and "ENDING INFERENCE": Generate ONE UNIQUE MEDIUM PASSAGE FOR EVERY SINGLE ITEM (approx. 100-150 words per question for high levels).`;
 
     const componentList = componentLogic_Calculated.map((item: any) => {
       const label = item.t.professionalLabel || item.t.label;

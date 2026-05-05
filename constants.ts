@@ -138,14 +138,18 @@ Objective: Execute three-layered cognitive construction for maximum diagnostic i
 4. [ANSWER BUCKET]: Use [BUCKET RANDOMIZATION] (3A, 2B, 2C, 3D per 10). Max streak 2. Answer key must match exercise type.
 
 --- LAYER 2: SKILL MODULES (PRIORITY 2 - COGNITIVE DEPTH) ---
-5. [READING MODULE]: [EXPERT EXAMINER MODE]. Paraphrase everything; no word-matching. Mix gist, detail, and [INFERENTIAL CLOZE] (incomplete sentence completions). For "One/Two Words", use IELTS style (questions + statement gaps). For Level 10+, passages MUST be 500-800+ words.
-6. [VOCABULARY MODULE]: [POS CONSISTENCY]. All distractors must be same part of speech. [SHUFFLE & DECOUPLE]: Randomize order, don't match Part A definitions.
-7. [GRAMMAR MODULE]: [RULE EXHAUSTION]. Test every sub-rule of {{TOPIC}}. Use [POSITIONAL LOGIC] (Word order, comparative traps, adverb placement).
+5. [DISTRACTOR QUALITY]: All MCQs must include high-quality distractors. RULES: Exactly ONE correct answer. All others plausible but incorrect. TYPES: 1. Near-miss, 2. Partial truth, 3. Opposite, 4. Overgeneralization, 5. Detail confusion, 6. Paraphrase trap.
+6. [READING MODULE]: [EXPERT EXAMINER MODE]. Paraphrase everything; no word-matching. For "One/Two Words", use IELTS style. For Level 10+, passages MUST be 750-950+ words. The total test for READING ALWAYS must have exactly 40 items.
+7. [HUMANIZED REALISM]: For READING, break repetitive "To + verb" structures. Add slight natural imperfections in phrasing. Make distractors less symmetrical (varying lengths/complexity). Add "messy realism" (avoid perfectly balanced AI patterns).
+8. [VOCABULARY SCALING]: Use simple, high-frequency vocabulary for lower levels (1-4). Focus on comprehension depth rather than extremely academic vocabulary across all levels.
+9. [READING BALANCE]: If multiple exercise types are selected, divide the 40 items proportionally. For "Topic ID" and "Ending Inference", generate ONE UNIQUE PASSAGE PER QUESTION. Scale passage length by {{LEVEL}}.
+10. [VOCABULARY MODULE]: [POS CONSISTENCY]. All distractors must be same part of speech. [SHUFFLE & DECOUPLE]: Randomize order, don't match Part A definitions.
+11. [GRAMMAR MODULE]: [RULE EXHAUSTION]. Test every sub-rule of {{TOPIC}}. Use [POSITIONAL LOGIC] (Word order, comparative traps, adverb placement).
 
 --- LAYER 3: NATURAL EXPRESSION (PRIORITY 3 - ANTI-ROBOT) ---
-8. [SCENARIO VARIETY]: [SCENARIO CHAOS]. Unique, vivid scenarios (chef, cat, astronaut). Zero theme repetition. Shuffle all subjects.
-9. [STYLE & BURSTINESS]: [LEXICAL PURGE]. Ban AI-hallmark words (vibrant, bustling). Use [SYNTATIC BURSTINESS] (alternate short/long sentences).
-10. [COGNITIVE SCALING - ABSULUTE MANDATE]: Complexity and VOLUME MUST scale exponentially with {{LEVEL}}. Level 11+ must be a professional-grade gauntlet of length and difficulty.
+12. [SCENARIO VARIETY]: [SCENARIO CHAOS]. Unique, vivid scenarios (chef, cat, astronaut). Zero theme repetition. Shuffle all subjects.
+13. [STYLE & BURSTINESS]: [LEXICAL PURGE]. Ban AI-hallmark words (vibrant, bustling). Use [SYNTATIC BURSTINESS] (alternate short/long sentences).
+14. [COGNITIVE SCALING - ABSULUTE MANDATE]: Complexity and VOLUME MUST scale exponentially with {{LEVEL}}. Level 11+ must be a professional-grade gauntlet.
 
 ### PRIORITY: MCQ LAYOUT, 13-UNDERSCORE COMPLETE, LEXICAL PERSISTENCE, AND SUBJECT VARIETY ARE ABSOLUTE. ###
 `;
@@ -155,7 +159,7 @@ export const DEFAULT_STRICT_RULES: StrictRule[] = [
   { id: 'rule-context-mandate', label: '2. CONTEXT MANDATE', description: 'Full context required.', promptInjection: '[CONTEXT MANDATORY]: Every single question MUST have a clear context sentence. Blanks in a vacuum are FORBIDDEN.', active: true, priority: 'High', category: 'Core' },
   { id: 'rule-grammar-integrity', label: '3. GRAMMAR INTEGRITY', description: 'No-free-verb & Situational logic.', promptInjection: '[GRAMMAR INTEGRITY]: Apply [NO-FREE-VERB RULE] (move verb to options). Test situational logic (e.g. Must vs Have to) via evidence.', active: true, priority: 'High', category: 'Core' },
   { id: 'rule-answer-architecture', label: '4. ANSWER ARCHITECTURE', description: 'Bucket optimization.', promptInjection: '[ANSWER BUCKET]: Use [BUCKET RANDOMIZATION] (3A, 2B, 2C, 3D per 10). Max streak 2. Key format must match task type.', active: true, priority: 'High', category: 'Core' },
-  { id: 'rule-reading-module', label: '5. READING MODULE', description: 'Expert reading blueprint.', promptInjection: '[READING MODULE]: [EXPERT EXAMINER MODE]. Paraphrase everything; no word-matching. Mix gist/detail. Include reference traps.', active: true, priority: 'High', category: 'Modules' },
+  { id: 'rule-reading-module', label: '5. READING MODULE', description: 'Expert reading blueprint.', promptInjection: '[READING MODULE]: [EXPERT EXAMINER MODE]. Paraphrase; no word-matching. 40 items total. Break repetitive structures. Asymmetrical distractors. "Messy realism". Easy vocab for lower levels.', active: true, priority: 'High', category: 'Modules' },
   { id: 'rule-vocab-module', label: '6. VOCABULARY MODULE', description: 'POS & Shuffle rules.', promptInjection: '[VOCABULARY MODULE]: [POS CONSISTENCY]. All distractors must be same POS. [SHUFFLE & DECOUPLE]: Randomize order vs definitions.', active: true, priority: 'High', category: 'Modules' },
   { id: 'rule-grammar-module', label: '7. GRAMMAR MODULE', description: 'Positional logic & sub-rules.', promptInjection: '[GRAMMAR MODULE]: [RULE EXHAUSTION]. Test all sub-rules. Use [POSITIONAL LOGIC] (Word order, comparative traps).', active: true, priority: 'High', category: 'Modules' }
 ];
@@ -276,7 +280,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'READING', 
     label: 'ONE/TWO WORDS', 
     professionalLabel: '<b>WRITE NO MORE THAN TWO WORDS AND/OR A NUMBER FOR EACH ANSWER.</b>', 
-    prompt: 'IELTS style short answer and statement completion. Items can be questions (e.g., "Where...?") or incomplete sentences (e.g., "She is interested in ______"). MANDATORY: Use heavy paraphrasing and synonyms. The words in the answer must exist in the text, but the question stem must use synonyms of the context. Provide exact word count limits.', 
+    prompt: 'IELTS style. Mix questions and statement gaps (e.g. "She is interested in _________"). MANDATORY: Heavy paraphrasing and synonyms. Stems use synonyms; answers MUST use exact words from text.', 
     columnCount: 1 
   },
   { 
@@ -284,7 +288,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'READING', 
     label: 'INFERENTIAL', 
     professionalLabel: '<b>INFERENTIAL COMPREHENSION ANALYSIS.</b>', 
-    prompt: 'Items testing deep inference using incomplete sentence stems. The passage provides context, and the item ends abruptly (e.g., "She likes her work, and she..."). Options must be logical conclusions. Use stems like: "We can infer that...", "It suggests that...", "Probably...". The answer MUST NOT be directly stated in the text.', 
+    prompt: 'Ending Inference style. Items end the passage context with gaps or questions like: "what is he probably going to do?", "We can infer that...", "It suggests that...". Correct answer must be a logical conclusion, NOT directly stated.', 
     columnCount: 1 
   },
   { 
@@ -293,6 +297,22 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     label: 'CRITICAL THINKING', 
     professionalLabel: '<b>CRITICAL THINKING & ANALYSIS.</b>', 
     prompt: 'Analyze author purpose and provide evidence-based opinions.', 
+    columnCount: 1 
+  },
+  { 
+    id: 'r_ending_inference_elite', 
+    category: 'READING', 
+    label: 'ENDING INFERENCE', 
+    professionalLabel: '<b>CHOSE THE BEST LOGICAL ENDING FOR THE PASSAGE.</b>', 
+    prompt: 'Assess ENDING INFERENCE. CRITICAL: Generate ONE UNIQUE PASSAGE PER QUESTION. Options must be subtle interpretations of the final sentence. No direct statements. Scale passage length by Level.', 
+    columnCount: 1 
+  },
+  { 
+    id: 'r_topic_identification_elite', 
+    category: 'READING', 
+    label: 'TOPIC ID', 
+    professionalLabel: '<b>IDENTIFY THE BEST OVERALL TOPIC FOR THE PASSAGE.</b>', 
+    prompt: 'Assess TOPIC IDENTIFICATION. CRITICAL: Generate ONE UNIQUE PASSAGE PER QUESTION. All 4 choices must belong to the SAME general topic but differ in scope (one too broad, one too narrow, one correct). Scale passage length by Level.', 
     columnCount: 1 
   },
 
@@ -422,7 +442,7 @@ export const INITIAL_TEMPLATES: InstructionTemplate[] = [
     category: 'READING', 
     label: 'SUMMARY BOX', 
     professionalLabel: '<b>COMPLETE THE SUMMARY BELOW USING THE WORDS FROM THE BOX.</b>', 
-    prompt: 'IELTS style summary completion. Rewrite a section of the main passage in simpler/different words. Provide an HTML box containing vocabulary options. MANDATORY: The box MUST contain more words (distractors) than there are blanks in the summary.', 
+    prompt: 'IELTS style summary completion. 1. Generate a long passage. 2. Rewrite/Summarize a section of that passage into a shorter summary with gaps. 3. Provide an HTML box containing vocabulary options. MANDATORY: The box MUST contain more words (distractors) than there are blanks. Test ability to identify synonyms and summarized information.', 
     columnCount: 1 
   },
   { 
